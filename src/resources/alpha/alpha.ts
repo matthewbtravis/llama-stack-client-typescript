@@ -7,6 +7,8 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { APIResource } from '../../resource';
+import * as AdminAPI from './admin';
+import { Admin, AdminListRoutesParams } from './admin';
 import * as BenchmarksAPI from './benchmarks';
 import {
   Benchmark,
@@ -31,6 +33,7 @@ import {
 import * as PostTrainingAPI from './post-training/post-training';
 import {
   AlgorithmConfig,
+  ListPostTrainingJobsResponse,
   PostTraining,
   PostTrainingJob,
   PostTrainingPreferenceOptimizeParams,
@@ -38,27 +41,24 @@ import {
 } from './post-training/post-training';
 
 export class Alpha extends APIResource {
-  inference: InferenceAPI.Inference = new InferenceAPI.Inference(this._client);
   postTraining: PostTrainingAPI.PostTraining = new PostTrainingAPI.PostTraining(this._client);
   benchmarks: BenchmarksAPI.Benchmarks = new BenchmarksAPI.Benchmarks(this._client);
   eval: EvalAPI.Eval = new EvalAPI.Eval(this._client);
+  admin: AdminAPI.Admin = new AdminAPI.Admin(this._client);
+  inference: InferenceAPI.Inference = new InferenceAPI.Inference(this._client);
 }
 
-Alpha.Inference = Inference;
 Alpha.PostTraining = PostTraining;
 Alpha.Benchmarks = Benchmarks;
 Alpha.Eval = Eval;
+Alpha.Admin = Admin;
+Alpha.Inference = Inference;
 
 export declare namespace Alpha {
   export {
-    Inference as Inference,
-    type InferenceRerankResponse as InferenceRerankResponse,
-    type InferenceRerankParams as InferenceRerankParams,
-  };
-
-  export {
     PostTraining as PostTraining,
     type AlgorithmConfig as AlgorithmConfig,
+    type ListPostTrainingJobsResponse as ListPostTrainingJobsResponse,
     type PostTrainingJob as PostTrainingJob,
     type PostTrainingPreferenceOptimizeParams as PostTrainingPreferenceOptimizeParams,
     type PostTrainingSupervisedFineTuneParams as PostTrainingSupervisedFineTuneParams,
@@ -81,5 +81,13 @@ export declare namespace Alpha {
     type EvalEvaluateRowsAlphaParams as EvalEvaluateRowsAlphaParams,
     type EvalRunEvalParams as EvalRunEvalParams,
     type EvalRunEvalAlphaParams as EvalRunEvalAlphaParams,
+  };
+
+  export { Admin as Admin, type AdminListRoutesParams as AdminListRoutesParams };
+
+  export {
+    Inference as Inference,
+    type InferenceRerankResponse as InferenceRerankResponse,
+    type InferenceRerankParams as InferenceRerankParams,
   };
 }

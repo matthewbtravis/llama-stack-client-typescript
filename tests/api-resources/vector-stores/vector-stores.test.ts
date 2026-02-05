@@ -74,7 +74,12 @@ describe('resource vectorStores', () => {
     // ensure the request options are being passed correctly by passing an invalid HTTP method in order to cause an error
     await expect(
       client.vectorStores.list(
-        { after: 'after', before: 'before', limit: 0, order: 'order' },
+        {
+          after: 'after',
+          before: 'before',
+          limit: 0,
+          order: 'order',
+        },
         { path: '/_stainless_unknown_path' },
       ),
     ).rejects.toThrow(LlamaStackClient.NotFoundError);
@@ -114,7 +119,14 @@ describe('resource vectorStores', () => {
       query: 'string',
       filters: { foo: 'bar' },
       max_num_results: 0,
-      ranking_options: { ranker: 'ranker', score_threshold: 0 },
+      ranking_options: {
+        alpha: 0,
+        impact_factor: 0,
+        model: 'model',
+        ranker: 'ranker',
+        score_threshold: 0,
+        weights: { foo: 0 },
+      },
       rewrite_query: true,
       search_mode: 'search_mode',
     });

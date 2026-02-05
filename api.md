@@ -2,13 +2,19 @@
 
 Types:
 
+- <code><a href="./src/resources/shared.ts">HealthInfo</a></code>
 - <code><a href="./src/resources/shared.ts">InterleavedContent</a></code>
 - <code><a href="./src/resources/shared.ts">InterleavedContentItem</a></code>
+- <code><a href="./src/resources/shared.ts">ListProvidersResponse</a></code>
+- <code><a href="./src/resources/shared.ts">ListRoutesResponse</a></code>
 - <code><a href="./src/resources/shared.ts">ParamType</a></code>
+- <code><a href="./src/resources/shared.ts">ProviderInfo</a></code>
+- <code><a href="./src/resources/shared.ts">RouteInfo</a></code>
 - <code><a href="./src/resources/shared.ts">SafetyViolation</a></code>
 - <code><a href="./src/resources/shared.ts">SamplingParams</a></code>
 - <code><a href="./src/resources/shared.ts">ScoringResult</a></code>
 - <code><a href="./src/resources/shared.ts">SystemMessage</a></code>
+- <code><a href="./src/resources/shared.ts">VersionInfo</a></code>
 
 # Toolgroups
 
@@ -87,10 +93,10 @@ Methods:
 
 - <code title="post /v1/prompts">client.prompts.<a href="./src/resources/prompts/prompts.ts">create</a>({ ...params }) -> Prompt</code>
 - <code title="get /v1/prompts/{prompt_id}">client.prompts.<a href="./src/resources/prompts/prompts.ts">retrieve</a>(promptId, { ...params }) -> Prompt</code>
-- <code title="post /v1/prompts/{prompt_id}">client.prompts.<a href="./src/resources/prompts/prompts.ts">update</a>(promptId, { ...params }) -> Prompt</code>
+- <code title="put /v1/prompts/{prompt_id}">client.prompts.<a href="./src/resources/prompts/prompts.ts">update</a>(promptId, { ...params }) -> Prompt</code>
 - <code title="get /v1/prompts">client.prompts.<a href="./src/resources/prompts/prompts.ts">list</a>() -> PromptListResponse</code>
 - <code title="delete /v1/prompts/{prompt_id}">client.prompts.<a href="./src/resources/prompts/prompts.ts">delete</a>(promptId) -> void</code>
-- <code title="post /v1/prompts/{prompt_id}/set-default-version">client.prompts.<a href="./src/resources/prompts/prompts.ts">setDefaultVersion</a>(promptId, { ...params }) -> Prompt</code>
+- <code title="put /v1/prompts/{prompt_id}/set-default-version">client.prompts.<a href="./src/resources/prompts/prompts.ts">setDefaultVersion</a>(promptId, { ...params }) -> Prompt</code>
 
 ## Versions
 
@@ -129,13 +135,6 @@ Methods:
 - <code title="get /v1/conversations/{conversation_id}/items/{item_id}">client.conversations.items.<a href="./src/resources/conversations/items.ts">get</a>(conversationId, itemId) -> ItemGetResponse</code>
 
 # Inspect
-
-Types:
-
-- <code><a href="./src/resources/inspect.ts">HealthInfo</a></code>
-- <code><a href="./src/resources/inspect.ts">ProviderInfo</a></code>
-- <code><a href="./src/resources/inspect.ts">RouteInfo</a></code>
-- <code><a href="./src/resources/inspect.ts">VersionInfo</a></code>
 
 Methods:
 
@@ -269,7 +268,6 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/providers.ts">ListProvidersResponse</a></code>
 - <code><a href="./src/resources/providers.ts">ProviderListResponse</a></code>
 
 Methods:
@@ -281,7 +279,6 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/routes.ts">ListRoutesResponse</a></code>
 - <code><a href="./src/resources/routes.ts">RouteListResponse</a></code>
 
 Methods:
@@ -386,21 +383,12 @@ Methods:
 
 # Alpha
 
-## Inference
-
-Types:
-
-- <code><a href="./src/resources/alpha/inference.ts">InferenceRerankResponse</a></code>
-
-Methods:
-
-- <code title="post /v1alpha/inference/rerank">client.alpha.inference.<a href="./src/resources/alpha/inference.ts">rerank</a>({ ...params }) -> InferenceRerankResponse</code>
-
 ## PostTraining
 
 Types:
 
 - <code><a href="./src/resources/alpha/post-training/post-training.ts">AlgorithmConfig</a></code>
+- <code><a href="./src/resources/alpha/post-training/post-training.ts">ListPostTrainingJobsResponse</a></code>
 - <code><a href="./src/resources/alpha/post-training/post-training.ts">PostTrainingJob</a></code>
 
 Methods:
@@ -412,7 +400,6 @@ Methods:
 
 Types:
 
-- <code><a href="./src/resources/alpha/post-training/job.ts">ListPostTrainingJobsResponse</a></code>
 - <code><a href="./src/resources/alpha/post-training/job.ts">JobListResponse</a></code>
 - <code><a href="./src/resources/alpha/post-training/job.ts">JobArtifactsResponse</a></code>
 - <code><a href="./src/resources/alpha/post-training/job.ts">JobStatusResponse</a></code>
@@ -420,9 +407,9 @@ Types:
 Methods:
 
 - <code title="get /v1alpha/post-training/jobs">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">list</a>() -> JobListResponse</code>
-- <code title="get /v1alpha/post-training/job/artifacts">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">artifacts</a>({ ...params }) -> JobArtifactsResponse</code>
-- <code title="post /v1alpha/post-training/job/cancel">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">cancel</a>({ ...params }) -> void</code>
-- <code title="get /v1alpha/post-training/job/status">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">status</a>({ ...params }) -> JobStatusResponse</code>
+- <code title="get /v1alpha/post-training/job/artifacts">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">artifacts</a>() -> JobArtifactsResponse</code>
+- <code title="post /v1alpha/post-training/job/cancel">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">cancel</a>() -> void</code>
+- <code title="get /v1alpha/post-training/job/status">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">status</a>() -> JobStatusResponse</code>
 
 ## Benchmarks
 
@@ -461,6 +448,26 @@ Methods:
 - <code title="get /v1alpha/eval/benchmarks/{benchmark_id}/jobs/{job_id}/result">client.alpha.eval.jobs.<a href="./src/resources/alpha/eval/jobs.ts">retrieve</a>(benchmarkId, jobId) -> EvaluateResponse</code>
 - <code title="delete /v1alpha/eval/benchmarks/{benchmark_id}/jobs/{job_id}">client.alpha.eval.jobs.<a href="./src/resources/alpha/eval/jobs.ts">cancel</a>(benchmarkId, jobId) -> void</code>
 - <code title="get /v1alpha/eval/benchmarks/{benchmark_id}/jobs/{job_id}">client.alpha.eval.jobs.<a href="./src/resources/alpha/eval/jobs.ts">status</a>(benchmarkId, jobId) -> Job</code>
+
+## Admin
+
+Methods:
+
+- <code title="get /v1alpha/admin/health">client.alpha.admin.<a href="./src/resources/alpha/admin.ts">health</a>() -> HealthInfo</code>
+- <code title="get /v1alpha/admin/providers/{provider_id}">client.alpha.admin.<a href="./src/resources/alpha/admin.ts">inspectProvider</a>(providerId) -> ProviderInfo</code>
+- <code title="get /v1alpha/admin/providers">client.alpha.admin.<a href="./src/resources/alpha/admin.ts">listProviders</a>() -> ProviderListResponse</code>
+- <code title="get /v1alpha/admin/inspect/routes">client.alpha.admin.<a href="./src/resources/alpha/admin.ts">listRoutes</a>({ ...params }) -> RouteListResponse</code>
+- <code title="get /v1alpha/admin/version">client.alpha.admin.<a href="./src/resources/alpha/admin.ts">version</a>() -> VersionInfo</code>
+
+## Inference
+
+Types:
+
+- <code><a href="./src/resources/alpha/inference.ts">InferenceRerankResponse</a></code>
+
+Methods:
+
+- <code title="post /v1alpha/inference/rerank">client.alpha.inference.<a href="./src/resources/alpha/inference.ts">rerank</a>({ ...params }) -> InferenceRerankResponse</code>
 
 # Beta
 

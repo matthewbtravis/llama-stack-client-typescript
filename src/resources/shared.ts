@@ -6,6 +6,19 @@
 //
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
+import * as ProvidersAPI from './providers';
+import * as RoutesAPI from './routes';
+
+/**
+ * Health status information for the service.
+ */
+export interface HealthInfo {
+  /**
+   * The health status of the service
+   */
+  status: 'OK' | 'Error' | 'Not Implemented';
+}
+
 /**
  * A image content item
  */
@@ -159,6 +172,26 @@ export namespace InterleavedContentItem {
 }
 
 /**
+ * Response containing a list of all available providers.
+ */
+export interface ListProvidersResponse {
+  /**
+   * List of provider information objects
+   */
+  data: ProvidersAPI.ProviderListResponse;
+}
+
+/**
+ * Response containing a list of all available API routes.
+ */
+export interface ListRoutesResponse {
+  /**
+   * List of available API routes
+   */
+  data: RoutesAPI.RouteListResponse;
+}
+
+/**
  * Parameter type for string values.
  */
 export type ParamType =
@@ -238,32 +271,101 @@ export namespace ParamType {
 }
 
 /**
+ * Information about a registered provider including its configuration and health
+ * status.
+ */
+export interface ProviderInfo {
+  /**
+   * The API name this provider implements
+   */
+  api: string;
+
+  /**
+   * Configuration parameters for the provider
+   */
+  config: { [key: string]: unknown };
+
+  /**
+   * Current health status of the provider
+   */
+  health: { [key: string]: unknown };
+
+  /**
+   * Unique identifier for the provider
+   */
+  provider_id: string;
+
+  /**
+   * The type of provider implementation
+   */
+  provider_type: string;
+}
+
+/**
+ * Information about an API route including its path, method, and implementing
+ * providers.
+ */
+export interface RouteInfo {
+  /**
+   * The HTTP method for the route
+   */
+  method: string;
+
+  /**
+   * List of provider types implementing this route
+   */
+  provider_types: Array<string>;
+
+  /**
+   * The API route path
+   */
+  route: string;
+}
+
+/**
  * Details of a safety violation detected by content moderation.
  */
 export interface SafetyViolation {
   /**
-   * Severity level of a safety violation.
+   * Severity level of the violation
    */
   violation_level: 'info' | 'warn' | 'error';
 
+  /**
+   * Additional metadata including specific violation codes
+   */
   metadata?: { [key: string]: unknown };
 
+  /**
+   * Message to convey to the user about the violation
+   */
   user_message?: string | null;
 }
 
 /**
- * Sampling parameters.
+ * Sampling parameters for text generation.
  */
 export interface SamplingParams {
+  /**
+   * The maximum number of tokens that can be generated in the completion. The token
+   * count of your prompt plus max_tokens cannot exceed the model's context length.
+   */
   max_tokens?: number | null;
 
+  /**
+   * Number between -2.0 and 2.0. Positive values penalize new tokens based on
+   * whether they appear in the text so far.
+   */
   repetition_penalty?: number | null;
 
+  /**
+   * Up to 4 sequences where the API will stop generating further tokens. The
+   * returned text will not contain the stop sequence.
+   */
   stop?: Array<string> | null;
 
   /**
-   * Greedy sampling strategy that selects the highest probability token at each
-   * step.
+   * The sampling strategy to use.
    */
   strategy?:
     | SamplingParams.GreedySamplingStrategy
@@ -277,6 +379,9 @@ export namespace SamplingParams {
    * step.
    */
   export interface GreedySamplingStrategy {
+    /**
+     * Must be 'greedy' to identify this sampling strategy.
+     */
     type?: 'greedy';
   }
 
@@ -285,10 +390,19 @@ export namespace SamplingParams {
    * with cumulative probability >= p.
    */
   export interface TopPSamplingStrategy {
-    temperature: number | null;
+    /**
+     * Controls randomness in sampling. Higher values increase randomness.
+     */
+    temperature: number;
 
-    top_p?: number | null;
+    /**
+     * Cumulative probability threshold for nucleus sampling.
+     */
+    top_p?: number;
 
+    /**
+     * Must be 'top_p' to identify this sampling strategy.
+     */
     type?: 'top_p';
   }
 
@@ -296,8 +410,14 @@ export namespace SamplingParams {
    * Top-k sampling strategy that restricts sampling to the k most likely tokens.
    */
   export interface TopKSamplingStrategy {
+    /**
+     * Number of top tokens to consider for sampling. Must be at least 1.
+     */
     top_k: number;
 
+    /**
+     * Must be 'top_k' to identify this sampling strategy.
+     */
     type?: 'top_k';
   }
 }
@@ -306,8 +426,14 @@ export namespace SamplingParams {
  * A scoring result for a single row.
  */
 export interface ScoringResult {
+  /**
+   * Map of metric name to aggregated value
+   */
   aggregated_results: { [key: string]: unknown };
 
+  /**
+   * The scoring result for each row. Each row is a map of column name to value.
+   */
   score_rows: Array<{ [key: string]: unknown }>;
 }
 
@@ -316,7 +442,9 @@ export interface ScoringResult {
  */
 export interface SystemMessage {
   /**
-   * A image content item
+   * The content of the 'system prompt'. If multiple system messages are provided,
+   * they are concatenated. The underlying Llama Stack code may also add other system
+   * messages.
    */
   content:
     | string
@@ -324,6 +452,9 @@ export interface SystemMessage {
     | SystemMessage.TextContentItem
     | Array<SystemMessage.ImageContentItemInput | SystemMessage.TextContentItem>;
 
+  /**
+   * Must be 'system' to identify this as a system message.
+   */
   role?: 'system';
 }
 
@@ -415,4 +546,14 @@ export namespace SystemMessage {
 
     type?: 'text';
   }
+}
+
+/**
+ * Version information for the service.
+ */
+export interface VersionInfo {
+  /**
+   * The version string of the service
+   */
+  version: string;
 }

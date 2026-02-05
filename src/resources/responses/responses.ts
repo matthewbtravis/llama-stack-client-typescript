@@ -102,12 +102,18 @@ export interface ResponseObject {
 
   status: string;
 
+  store: boolean;
+
+  completed_at?: number | null;
+
   /**
    * Error details for failed OpenAI response requests.
    */
   error?: ResponseObject.Error | null;
 
   instructions?: string | null;
+
+  max_output_tokens?: number | null;
 
   max_tool_calls?: number | null;
 
@@ -124,12 +130,36 @@ export interface ResponseObject {
    */
   prompt?: ResponseObject.Prompt | null;
 
+  /**
+   * Configuration for reasoning effort in OpenAI responses.
+   *
+   * Controls how much reasoning the model performs before generating a response.
+   */
+  reasoning?: ResponseObject.Reasoning | null;
+
+  safety_identifier?: string | null;
+
   temperature?: number | null;
 
   /**
    * Text response configuration for OpenAI responses.
    */
   text?: ResponseObject.Text;
+
+  /**
+   * Constrains the tools available to the model to a pre-defined set.
+   */
+  tool_choice?:
+    | 'auto'
+    | 'required'
+    | 'none'
+    | ResponseObject.OpenAIResponseInputToolChoiceAllowedTools
+    | ResponseObject.OpenAIResponseInputToolChoiceFileSearch
+    | ResponseObject.OpenAIResponseInputToolChoiceWebSearch
+    | ResponseObject.OpenAIResponseInputToolChoiceFunctionTool
+    | ResponseObject.OpenAIResponseInputToolChoiceMcpTool
+    | ResponseObject.OpenAIResponseInputToolChoiceCustomTool
+    | null;
 
   tools?: Array<
     | ResponseObject.OpenAIResponseInputToolWebSearch
@@ -163,7 +193,7 @@ export namespace ResponseObject {
           | OpenAIResponseMessageOutput.OpenAIResponseInputMessageContentFile
         >
       | Array<
-          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputText
+          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputTextOutput
           | OpenAIResponseMessageOutput.OpenAIResponseContentPartRefusal
         >;
 
@@ -214,20 +244,22 @@ export namespace ResponseObject {
       type?: 'input_file';
     }
 
-    export interface OpenAIResponseOutputMessageContentOutputText {
+    export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
       annotations?: Array<
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationContainerFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationContainerFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFilePath
       >;
+
+      logprobs?: Array<OpenAIResponseOutputMessageContentOutputTextOutput.Logprob> | null;
 
       type?: 'output_text';
     }
 
-    export namespace OpenAIResponseOutputMessageContentOutputText {
+    export namespace OpenAIResponseOutputMessageContentOutputTextOutput {
       /**
        * File citation annotation for referencing specific files in response content.
        */
@@ -276,6 +308,55 @@ export namespace ResponseObject {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -474,6 +555,15 @@ export namespace ResponseObject {
   }
 
   /**
+   * Configuration for reasoning effort in OpenAI responses.
+   *
+   * Controls how much reasoning the model performs before generating a response.
+   */
+  export interface Reasoning {
+    effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+  }
+
+  /**
    * Text response configuration for OpenAI responses.
    */
   export interface Text {
@@ -501,6 +591,60 @@ export namespace ResponseObject {
   }
 
   /**
+   * Constrains the tools available to the model to a pre-defined set.
+   */
+  export interface OpenAIResponseInputToolChoiceAllowedTools {
+    tools: Array<{ [key: string]: string }>;
+
+    mode?: 'auto' | 'required';
+
+    type?: 'allowed_tools';
+  }
+
+  /**
+   * Indicates that the model should use file search to generate a response.
+   */
+  export interface OpenAIResponseInputToolChoiceFileSearch {
+    type?: 'file_search';
+  }
+
+  /**
+   * Indicates that the model should use web search to generate a response
+   */
+  export interface OpenAIResponseInputToolChoiceWebSearch {
+    type?: 'web_search' | 'web_search_preview' | 'web_search_preview_2025_03_11' | 'web_search_2025_08_26';
+  }
+
+  /**
+   * Forces the model to call a specific function.
+   */
+  export interface OpenAIResponseInputToolChoiceFunctionTool {
+    name: string;
+
+    type?: 'function';
+  }
+
+  /**
+   * Forces the model to call a specific tool on a remote MCP server
+   */
+  export interface OpenAIResponseInputToolChoiceMcpTool {
+    server_label: string;
+
+    name?: string | null;
+
+    type?: 'mcp';
+  }
+
+  /**
+   * Forces the model to call a custom tool.
+   */
+  export interface OpenAIResponseInputToolChoiceCustomTool {
+    name: string;
+
+    type?: 'custom';
+  }
+
+  /**
    * Web search tool configuration for OpenAI response inputs.
    */
   export interface OpenAIResponseInputToolWebSearch {
@@ -521,6 +665,22 @@ export namespace ResponseObject {
 
     /**
      * Options for ranking and filtering search results.
+     *
+     * This class configures how search results are ranked and filtered. You can use
+     * algorithm-based rerankers (weighted, RRF) or neural rerankers. Defaults from
+     * VectorStoresConfig are used when parameters are not provided.
+     *
+     * Examples: # Weighted ranker with custom alpha
+     * SearchRankingOptions(ranker="weighted", alpha=0.7)
+     *
+     *     # RRF ranker with custom impact factor
+     *     SearchRankingOptions(ranker="rrf", impact_factor=50.0)
+     *
+     *     # Use config defaults (just specify ranker type)
+     *     SearchRankingOptions(ranker="weighted")  # Uses alpha from VectorStoresConfig
+     *
+     *     # Score threshold filtering
+     *     SearchRankingOptions(ranker="weighted", score_threshold=0.5)
      */
     ranking_options?: OpenAIResponseInputToolFileSearch.RankingOptions | null;
 
@@ -530,11 +690,48 @@ export namespace ResponseObject {
   export namespace OpenAIResponseInputToolFileSearch {
     /**
      * Options for ranking and filtering search results.
+     *
+     * This class configures how search results are ranked and filtered. You can use
+     * algorithm-based rerankers (weighted, RRF) or neural rerankers. Defaults from
+     * VectorStoresConfig are used when parameters are not provided.
+     *
+     * Examples: # Weighted ranker with custom alpha
+     * SearchRankingOptions(ranker="weighted", alpha=0.7)
+     *
+     *     # RRF ranker with custom impact factor
+     *     SearchRankingOptions(ranker="rrf", impact_factor=50.0)
+     *
+     *     # Use config defaults (just specify ranker type)
+     *     SearchRankingOptions(ranker="weighted")  # Uses alpha from VectorStoresConfig
+     *
+     *     # Score threshold filtering
+     *     SearchRankingOptions(ranker="weighted", score_threshold=0.5)
      */
     export interface RankingOptions {
+      /**
+       * Weight factor for weighted ranker
+       */
+      alpha?: number | null;
+
+      /**
+       * Impact factor for RRF algorithm
+       */
+      impact_factor?: number | null;
+
+      /**
+       * Model identifier for neural reranker
+       */
+      model?: string | null;
+
       ranker?: string | null;
 
       score_threshold?: number | null;
+
+      /**
+       * Weights for combining vector, keyword, and neural scores. Keys: 'vector',
+       * 'keyword', 'neural'
+       */
+      weights?: { [key: string]: number } | null;
     }
   }
 
@@ -582,19 +779,19 @@ export namespace ResponseObject {
   export interface Usage {
     input_tokens: number;
 
-    output_tokens: number;
-
-    total_tokens: number;
-
     /**
      * Token details for input tokens in OpenAI response usage.
      */
-    input_tokens_details?: Usage.InputTokensDetails | null;
+    input_tokens_details: Usage.InputTokensDetails;
+
+    output_tokens: number;
 
     /**
      * Token details for output tokens in OpenAI response usage.
      */
-    output_tokens_details?: Usage.OutputTokensDetails | null;
+    output_tokens_details: Usage.OutputTokensDetails;
+
+    total_tokens: number;
   }
 
   export namespace Usage {
@@ -602,14 +799,14 @@ export namespace ResponseObject {
      * Token details for input tokens in OpenAI response usage.
      */
     export interface InputTokensDetails {
-      cached_tokens?: number | null;
+      cached_tokens: number;
     }
 
     /**
      * Token details for output tokens in OpenAI response usage.
      */
     export interface OutputTokensDetails {
-      reasoning_tokens?: number | null;
+      reasoning_tokens: number;
     }
   }
 }
@@ -785,6 +982,8 @@ export namespace ResponseObjectStream {
           | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
         >;
 
+        logprobs?: Array<OpenAIResponseOutputMessageContentOutputText.Logprob> | null;
+
         type?: 'output_text';
       }
 
@@ -837,6 +1036,55 @@ export namespace ResponseObjectStream {
           index: number;
 
           type?: 'file_path';
+        }
+
+        /**
+         * The log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface Logprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+
+          /**
+           * The top log probabilities for the token.
+           */
+          top_logprobs?: Array<Logprob.TopLogprob> | null;
+        }
+
+        export namespace Logprob {
+          /**
+           * The top log probability for a token from an OpenAI-compatible chat completion
+           * response.
+           */
+          export interface TopLogprob {
+            /**
+             * The token.
+             */
+            token: string;
+
+            /**
+             * The log probability of the token.
+             */
+            logprob: number;
+
+            /**
+             * The bytes for the token.
+             */
+            bytes?: Array<number> | null;
+          }
         }
       }
 
@@ -1074,6 +1322,8 @@ export namespace ResponseObjectStream {
           | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
         >;
 
+        logprobs?: Array<OpenAIResponseOutputMessageContentOutputText.Logprob> | null;
+
         type?: 'output_text';
       }
 
@@ -1126,6 +1376,55 @@ export namespace ResponseObjectStream {
           index: number;
 
           type?: 'file_path';
+        }
+
+        /**
+         * The log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface Logprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+
+          /**
+           * The top log probabilities for the token.
+           */
+          top_logprobs?: Array<Logprob.TopLogprob> | null;
+        }
+
+        export namespace Logprob {
+          /**
+           * The top log probability for a token from an OpenAI-compatible chat completion
+           * response.
+           */
+          export interface TopLogprob {
+            /**
+             * The token.
+             */
+            token: string;
+
+            /**
+             * The log probability of the token.
+             */
+            logprob: number;
+
+            /**
+             * The bytes for the token.
+             */
+            bytes?: Array<number> | null;
+          }
         }
       }
 
@@ -1274,7 +1573,60 @@ export namespace ResponseObjectStream {
 
     sequence_number: number;
 
+    logprobs?: Array<OpenAIResponseObjectStreamResponseOutputTextDelta.Logprob> | null;
+
     type?: 'response.output_text.delta';
+  }
+
+  export namespace OpenAIResponseObjectStreamResponseOutputTextDelta {
+    /**
+     * The log probability for a token from an OpenAI-compatible chat completion
+     * response.
+     */
+    export interface Logprob {
+      /**
+       * The token.
+       */
+      token: string;
+
+      /**
+       * The log probability of the token.
+       */
+      logprob: number;
+
+      /**
+       * The bytes for the token.
+       */
+      bytes?: Array<number> | null;
+
+      /**
+       * The top log probabilities for the token.
+       */
+      top_logprobs?: Array<Logprob.TopLogprob> | null;
+    }
+
+    export namespace Logprob {
+      /**
+       * The top log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface TopLogprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+      }
+    }
   }
 
   /**
@@ -1472,7 +1824,7 @@ export namespace ResponseObjectStream {
         | OpenAIResponseContentPartOutputText.OpenAIResponseAnnotationFilePath
       >;
 
-      logprobs?: Array<{ [key: string]: unknown }> | null;
+      logprobs?: Array<OpenAIResponseContentPartOutputText.Logprob> | null;
 
       type?: 'output_text';
     }
@@ -1526,6 +1878,55 @@ export namespace ResponseObjectStream {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -1587,7 +1988,7 @@ export namespace ResponseObjectStream {
         | OpenAIResponseContentPartOutputText.OpenAIResponseAnnotationFilePath
       >;
 
-      logprobs?: Array<{ [key: string]: unknown }> | null;
+      logprobs?: Array<OpenAIResponseContentPartOutputText.Logprob> | null;
 
       type?: 'output_text';
     }
@@ -1641,6 +2042,55 @@ export namespace ResponseObjectStream {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -2020,12 +2470,18 @@ export interface ResponseListResponse {
 
   status: string;
 
+  store: boolean;
+
+  completed_at?: number | null;
+
   /**
    * Error details for failed OpenAI response requests.
    */
   error?: ResponseListResponse.Error | null;
 
   instructions?: string | null;
+
+  max_output_tokens?: number | null;
 
   max_tool_calls?: number | null;
 
@@ -2042,12 +2498,36 @@ export interface ResponseListResponse {
    */
   prompt?: ResponseListResponse.Prompt | null;
 
+  /**
+   * Configuration for reasoning effort in OpenAI responses.
+   *
+   * Controls how much reasoning the model performs before generating a response.
+   */
+  reasoning?: ResponseListResponse.Reasoning | null;
+
+  safety_identifier?: string | null;
+
   temperature?: number | null;
 
   /**
    * Text response configuration for OpenAI responses.
    */
   text?: ResponseListResponse.Text;
+
+  /**
+   * Constrains the tools available to the model to a pre-defined set.
+   */
+  tool_choice?:
+    | 'auto'
+    | 'required'
+    | 'none'
+    | ResponseListResponse.OpenAIResponseInputToolChoiceAllowedTools
+    | ResponseListResponse.OpenAIResponseInputToolChoiceFileSearch
+    | ResponseListResponse.OpenAIResponseInputToolChoiceWebSearch
+    | ResponseListResponse.OpenAIResponseInputToolChoiceFunctionTool
+    | ResponseListResponse.OpenAIResponseInputToolChoiceMcpTool
+    | ResponseListResponse.OpenAIResponseInputToolChoiceCustomTool
+    | null;
 
   tools?: Array<
     | ResponseListResponse.OpenAIResponseInputToolWebSearch
@@ -2081,7 +2561,7 @@ export namespace ResponseListResponse {
           | OpenAIResponseMessageOutput.OpenAIResponseInputMessageContentFile
         >
       | Array<
-          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputText
+          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputTextOutput
           | OpenAIResponseMessageOutput.OpenAIResponseContentPartRefusal
         >;
 
@@ -2132,20 +2612,22 @@ export namespace ResponseListResponse {
       type?: 'input_file';
     }
 
-    export interface OpenAIResponseOutputMessageContentOutputText {
+    export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
       annotations?: Array<
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationContainerFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationContainerFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFilePath
       >;
+
+      logprobs?: Array<OpenAIResponseOutputMessageContentOutputTextOutput.Logprob> | null;
 
       type?: 'output_text';
     }
 
-    export namespace OpenAIResponseOutputMessageContentOutputText {
+    export namespace OpenAIResponseOutputMessageContentOutputTextOutput {
       /**
        * File citation annotation for referencing specific files in response content.
        */
@@ -2194,6 +2676,55 @@ export namespace ResponseListResponse {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -2372,7 +2903,7 @@ export namespace ResponseListResponse {
           | OpenAIResponseMessageOutput.OpenAIResponseInputMessageContentFile
         >
       | Array<
-          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputText
+          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputTextOutput
           | OpenAIResponseMessageOutput.OpenAIResponseContentPartRefusal
         >;
 
@@ -2423,20 +2954,22 @@ export namespace ResponseListResponse {
       type?: 'input_file';
     }
 
-    export interface OpenAIResponseOutputMessageContentOutputText {
+    export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
       annotations?: Array<
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationContainerFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationContainerFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFilePath
       >;
+
+      logprobs?: Array<OpenAIResponseOutputMessageContentOutputTextOutput.Logprob> | null;
 
       type?: 'output_text';
     }
 
-    export namespace OpenAIResponseOutputMessageContentOutputText {
+    export namespace OpenAIResponseOutputMessageContentOutputTextOutput {
       /**
        * File citation annotation for referencing specific files in response content.
        */
@@ -2485,6 +3018,55 @@ export namespace ResponseListResponse {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -2512,7 +3094,7 @@ export namespace ResponseListResponse {
           | OpenAIResponseMessageOutput.OpenAIResponseInputMessageContentFile
         >
       | Array<
-          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputText
+          | OpenAIResponseMessageOutput.OpenAIResponseOutputMessageContentOutputTextOutput
           | OpenAIResponseMessageOutput.OpenAIResponseContentPartRefusal
         >;
 
@@ -2563,20 +3145,22 @@ export namespace ResponseListResponse {
       type?: 'input_file';
     }
 
-    export interface OpenAIResponseOutputMessageContentOutputText {
+    export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
       annotations?: Array<
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationContainerFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationContainerFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextOutput.OpenAIResponseAnnotationFilePath
       >;
+
+      logprobs?: Array<OpenAIResponseOutputMessageContentOutputTextOutput.Logprob> | null;
 
       type?: 'output_text';
     }
 
-    export namespace OpenAIResponseOutputMessageContentOutputText {
+    export namespace OpenAIResponseOutputMessageContentOutputTextOutput {
       /**
        * File citation annotation for referencing specific files in response content.
        */
@@ -2625,6 +3209,55 @@ export namespace ResponseListResponse {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -2823,6 +3456,15 @@ export namespace ResponseListResponse {
   }
 
   /**
+   * Configuration for reasoning effort in OpenAI responses.
+   *
+   * Controls how much reasoning the model performs before generating a response.
+   */
+  export interface Reasoning {
+    effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+  }
+
+  /**
    * Text response configuration for OpenAI responses.
    */
   export interface Text {
@@ -2850,6 +3492,60 @@ export namespace ResponseListResponse {
   }
 
   /**
+   * Constrains the tools available to the model to a pre-defined set.
+   */
+  export interface OpenAIResponseInputToolChoiceAllowedTools {
+    tools: Array<{ [key: string]: string }>;
+
+    mode?: 'auto' | 'required';
+
+    type?: 'allowed_tools';
+  }
+
+  /**
+   * Indicates that the model should use file search to generate a response.
+   */
+  export interface OpenAIResponseInputToolChoiceFileSearch {
+    type?: 'file_search';
+  }
+
+  /**
+   * Indicates that the model should use web search to generate a response
+   */
+  export interface OpenAIResponseInputToolChoiceWebSearch {
+    type?: 'web_search' | 'web_search_preview' | 'web_search_preview_2025_03_11' | 'web_search_2025_08_26';
+  }
+
+  /**
+   * Forces the model to call a specific function.
+   */
+  export interface OpenAIResponseInputToolChoiceFunctionTool {
+    name: string;
+
+    type?: 'function';
+  }
+
+  /**
+   * Forces the model to call a specific tool on a remote MCP server
+   */
+  export interface OpenAIResponseInputToolChoiceMcpTool {
+    server_label: string;
+
+    name?: string | null;
+
+    type?: 'mcp';
+  }
+
+  /**
+   * Forces the model to call a custom tool.
+   */
+  export interface OpenAIResponseInputToolChoiceCustomTool {
+    name: string;
+
+    type?: 'custom';
+  }
+
+  /**
    * Web search tool configuration for OpenAI response inputs.
    */
   export interface OpenAIResponseInputToolWebSearch {
@@ -2870,6 +3566,22 @@ export namespace ResponseListResponse {
 
     /**
      * Options for ranking and filtering search results.
+     *
+     * This class configures how search results are ranked and filtered. You can use
+     * algorithm-based rerankers (weighted, RRF) or neural rerankers. Defaults from
+     * VectorStoresConfig are used when parameters are not provided.
+     *
+     * Examples: # Weighted ranker with custom alpha
+     * SearchRankingOptions(ranker="weighted", alpha=0.7)
+     *
+     *     # RRF ranker with custom impact factor
+     *     SearchRankingOptions(ranker="rrf", impact_factor=50.0)
+     *
+     *     # Use config defaults (just specify ranker type)
+     *     SearchRankingOptions(ranker="weighted")  # Uses alpha from VectorStoresConfig
+     *
+     *     # Score threshold filtering
+     *     SearchRankingOptions(ranker="weighted", score_threshold=0.5)
      */
     ranking_options?: OpenAIResponseInputToolFileSearch.RankingOptions | null;
 
@@ -2879,11 +3591,48 @@ export namespace ResponseListResponse {
   export namespace OpenAIResponseInputToolFileSearch {
     /**
      * Options for ranking and filtering search results.
+     *
+     * This class configures how search results are ranked and filtered. You can use
+     * algorithm-based rerankers (weighted, RRF) or neural rerankers. Defaults from
+     * VectorStoresConfig are used when parameters are not provided.
+     *
+     * Examples: # Weighted ranker with custom alpha
+     * SearchRankingOptions(ranker="weighted", alpha=0.7)
+     *
+     *     # RRF ranker with custom impact factor
+     *     SearchRankingOptions(ranker="rrf", impact_factor=50.0)
+     *
+     *     # Use config defaults (just specify ranker type)
+     *     SearchRankingOptions(ranker="weighted")  # Uses alpha from VectorStoresConfig
+     *
+     *     # Score threshold filtering
+     *     SearchRankingOptions(ranker="weighted", score_threshold=0.5)
      */
     export interface RankingOptions {
+      /**
+       * Weight factor for weighted ranker
+       */
+      alpha?: number | null;
+
+      /**
+       * Impact factor for RRF algorithm
+       */
+      impact_factor?: number | null;
+
+      /**
+       * Model identifier for neural reranker
+       */
+      model?: string | null;
+
       ranker?: string | null;
 
       score_threshold?: number | null;
+
+      /**
+       * Weights for combining vector, keyword, and neural scores. Keys: 'vector',
+       * 'keyword', 'neural'
+       */
+      weights?: { [key: string]: number } | null;
     }
   }
 
@@ -2931,19 +3680,19 @@ export namespace ResponseListResponse {
   export interface Usage {
     input_tokens: number;
 
-    output_tokens: number;
-
-    total_tokens: number;
-
     /**
      * Token details for input tokens in OpenAI response usage.
      */
-    input_tokens_details?: Usage.InputTokensDetails | null;
+    input_tokens_details: Usage.InputTokensDetails;
+
+    output_tokens: number;
 
     /**
      * Token details for output tokens in OpenAI response usage.
      */
-    output_tokens_details?: Usage.OutputTokensDetails | null;
+    output_tokens_details: Usage.OutputTokensDetails;
+
+    total_tokens: number;
   }
 
   export namespace Usage {
@@ -2951,14 +3700,14 @@ export namespace ResponseListResponse {
      * Token details for input tokens in OpenAI response usage.
      */
     export interface InputTokensDetails {
-      cached_tokens?: number | null;
+      cached_tokens: number;
     }
 
     /**
      * Token details for output tokens in OpenAI response usage.
      */
     export interface OutputTokensDetails {
-      reasoning_tokens?: number | null;
+      reasoning_tokens: number;
     }
   }
 }
@@ -2977,6 +3726,9 @@ export interface ResponseDeleteResponse {
 export type ResponseCreateParams = ResponseCreateParamsNonStreaming | ResponseCreateParamsStreaming;
 
 export interface ResponseCreateParamsBase {
+  /**
+   * Input message(s) to create the response.
+   */
   input:
     | string
     | Array<
@@ -2989,25 +3741,69 @@ export interface ResponseCreateParamsBase {
         | ResponseCreateParams.OpenAIResponseMcpApprovalRequest
         | ResponseCreateParams.OpenAIResponseInputFunctionToolCallOutput
         | ResponseCreateParams.OpenAIResponseMcpApprovalResponse
-        | ResponseCreateParams.OpenAIResponseMessageInput
       >;
 
+  /**
+   * The underlying LLM used for completions.
+   */
   model: string;
 
+  /**
+   * Optional ID of a conversation to add the response to.
+   */
   conversation?: string | null;
 
-  include?: Array<string> | null;
+  /**
+   * List of guardrails to apply during response generation.
+   */
+  guardrails?: Array<string | ResponseCreateParams.ResponseGuardrailSpec> | null;
 
+  /**
+   * Additional fields to include in the response.
+   */
+  include?: Array<
+    | 'web_search_call.action.sources'
+    | 'code_interpreter_call.outputs'
+    | 'computer_call_output.output.image_url'
+    | 'file_search_call.results'
+    | 'message.input_image.image_url'
+    | 'message.output_text.logprobs'
+    | 'reasoning.encrypted_content'
+  > | null;
+
+  /**
+   * Instructions to guide the model's behavior.
+   */
   instructions?: string | null;
 
+  /**
+   * Maximum number of inference iterations.
+   */
   max_infer_iters?: number | null;
 
+  /**
+   * Upper bound for the number of tokens that can be generated for a response.
+   */
+  max_output_tokens?: number | null;
+
+  /**
+   * Max number of total calls to built-in tools that can be processed in a response.
+   */
   max_tool_calls?: number | null;
 
+  /**
+   * Dictionary of metadata key-value pairs to attach to the response.
+   */
   metadata?: { [key: string]: string } | null;
 
+  /**
+   * Whether to enable parallel tool calls.
+   */
   parallel_tool_calls?: boolean | null;
 
+  /**
+   * Optional ID of a previous response to continue from.
+   */
   previous_response_id?: string | null;
 
   /**
@@ -3015,10 +3811,31 @@ export interface ResponseCreateParamsBase {
    */
   prompt?: ResponseCreateParams.Prompt | null;
 
+  /**
+   * Configuration for reasoning effort in OpenAI responses.
+   *
+   * Controls how much reasoning the model performs before generating a response.
+   */
+  reasoning?: ResponseCreateParams.Reasoning | null;
+
+  /**
+   * A stable identifier used for safety monitoring and abuse detection.
+   */
+  safety_identifier?: string | null;
+
+  /**
+   * Whether to store the response in the database.
+   */
   store?: boolean | null;
 
+  /**
+   * Whether to stream the response.
+   */
   stream?: boolean | null;
 
+  /**
+   * Sampling temperature.
+   */
   temperature?: number | null;
 
   /**
@@ -3026,6 +3843,24 @@ export interface ResponseCreateParamsBase {
    */
   text?: ResponseCreateParams.Text | null;
 
+  /**
+   * How the model should select which tool to call (if any).
+   */
+  tool_choice?:
+    | 'auto'
+    | 'required'
+    | 'none'
+    | ResponseCreateParams.OpenAIResponseInputToolChoiceAllowedTools
+    | ResponseCreateParams.OpenAIResponseInputToolChoiceFileSearch
+    | ResponseCreateParams.OpenAIResponseInputToolChoiceWebSearch
+    | ResponseCreateParams.OpenAIResponseInputToolChoiceFunctionTool
+    | ResponseCreateParams.OpenAIResponseInputToolChoiceMcpTool
+    | ResponseCreateParams.OpenAIResponseInputToolChoiceCustomTool
+    | null;
+
+  /**
+   * List of tools available to the model.
+   */
   tools?: Array<
     | ResponseCreateParams.OpenAIResponseInputToolWebSearch
     | ResponseCreateParams.OpenAIResponseInputToolFileSearch
@@ -3049,7 +3884,7 @@ export namespace ResponseCreateParams {
           | OpenAIResponseMessageInput.OpenAIResponseInputMessageContentFile
         >
       | Array<
-          | OpenAIResponseMessageInput.OpenAIResponseOutputMessageContentOutputText
+          | OpenAIResponseMessageInput.OpenAIResponseOutputMessageContentOutputTextInput
           | OpenAIResponseMessageInput.OpenAIResponseContentPartRefusal
         >;
 
@@ -3100,20 +3935,22 @@ export namespace ResponseCreateParams {
       type?: 'input_file';
     }
 
-    export interface OpenAIResponseOutputMessageContentOutputText {
+    export interface OpenAIResponseOutputMessageContentOutputTextInput {
       text: string;
 
       annotations?: Array<
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationContainerFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationCitation
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationContainerFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationFilePath
       >;
+
+      logprobs?: Array<OpenAIResponseOutputMessageContentOutputTextInput.Logprob> | null;
 
       type?: 'output_text';
     }
 
-    export namespace OpenAIResponseOutputMessageContentOutputText {
+    export namespace OpenAIResponseOutputMessageContentOutputTextInput {
       /**
        * File citation annotation for referencing specific files in response content.
        */
@@ -3162,6 +3999,55 @@ export namespace ResponseCreateParams {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -3327,143 +4213,10 @@ export namespace ResponseCreateParams {
   }
 
   /**
-   * Corresponds to the various Message types in the Responses API. They are all
-   * under one type because the Responses API gives them all the same "type" value,
-   * and there is no way to tell them apart in certain scenarios.
+   * Specification for a guardrail to apply during response generation.
    */
-  export interface OpenAIResponseMessageInput {
-    content:
-      | string
-      | Array<
-          | OpenAIResponseMessageInput.OpenAIResponseInputMessageContentText
-          | OpenAIResponseMessageInput.OpenAIResponseInputMessageContentImage
-          | OpenAIResponseMessageInput.OpenAIResponseInputMessageContentFile
-        >
-      | Array<
-          | OpenAIResponseMessageInput.OpenAIResponseOutputMessageContentOutputText
-          | OpenAIResponseMessageInput.OpenAIResponseContentPartRefusal
-        >;
-
-    role: 'system' | 'developer' | 'user' | 'assistant';
-
-    id?: string | null;
-
-    status?: string | null;
-
-    type?: 'message';
-  }
-
-  export namespace OpenAIResponseMessageInput {
-    /**
-     * Text content for input messages in OpenAI response format.
-     */
-    export interface OpenAIResponseInputMessageContentText {
-      text: string;
-
-      type?: 'input_text';
-    }
-
-    /**
-     * Image content for input messages in OpenAI response format.
-     */
-    export interface OpenAIResponseInputMessageContentImage {
-      detail?: 'low' | 'high' | 'auto';
-
-      file_id?: string | null;
-
-      image_url?: string | null;
-
-      type?: 'input_image';
-    }
-
-    /**
-     * File content for input messages in OpenAI response format.
-     */
-    export interface OpenAIResponseInputMessageContentFile {
-      file_data?: string | null;
-
-      file_id?: string | null;
-
-      file_url?: string | null;
-
-      filename?: string | null;
-
-      type?: 'input_file';
-    }
-
-    export interface OpenAIResponseOutputMessageContentOutputText {
-      text: string;
-
-      annotations?: Array<
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationContainerFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
-      >;
-
-      type?: 'output_text';
-    }
-
-    export namespace OpenAIResponseOutputMessageContentOutputText {
-      /**
-       * File citation annotation for referencing specific files in response content.
-       */
-      export interface OpenAIResponseAnnotationFileCitation {
-        file_id: string;
-
-        filename: string;
-
-        index: number;
-
-        type?: 'file_citation';
-      }
-
-      /**
-       * URL citation annotation for referencing external web resources.
-       */
-      export interface OpenAIResponseAnnotationCitation {
-        end_index: number;
-
-        start_index: number;
-
-        title: string;
-
-        url: string;
-
-        type?: 'url_citation';
-      }
-
-      export interface OpenAIResponseAnnotationContainerFileCitation {
-        container_id: string;
-
-        end_index: number;
-
-        file_id: string;
-
-        filename: string;
-
-        start_index: number;
-
-        type?: 'container_file_citation';
-      }
-
-      export interface OpenAIResponseAnnotationFilePath {
-        file_id: string;
-
-        index: number;
-
-        type?: 'file_path';
-      }
-    }
-
-    /**
-     * Refusal content within a streamed response part.
-     */
-    export interface OpenAIResponseContentPartRefusal {
-      refusal: string;
-
-      type?: 'refusal';
-    }
+  export interface ResponseGuardrailSpec {
+    type: string;
   }
 
   /**
@@ -3522,6 +4275,15 @@ export namespace ResponseCreateParams {
   }
 
   /**
+   * Configuration for reasoning effort in OpenAI responses.
+   *
+   * Controls how much reasoning the model performs before generating a response.
+   */
+  export interface Reasoning {
+    effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+  }
+
+  /**
    * Text response configuration for OpenAI responses.
    */
   export interface Text {
@@ -3549,6 +4311,60 @@ export namespace ResponseCreateParams {
   }
 
   /**
+   * Constrains the tools available to the model to a pre-defined set.
+   */
+  export interface OpenAIResponseInputToolChoiceAllowedTools {
+    tools: Array<{ [key: string]: string }>;
+
+    mode?: 'auto' | 'required';
+
+    type?: 'allowed_tools';
+  }
+
+  /**
+   * Indicates that the model should use file search to generate a response.
+   */
+  export interface OpenAIResponseInputToolChoiceFileSearch {
+    type?: 'file_search';
+  }
+
+  /**
+   * Indicates that the model should use web search to generate a response
+   */
+  export interface OpenAIResponseInputToolChoiceWebSearch {
+    type?: 'web_search' | 'web_search_preview' | 'web_search_preview_2025_03_11' | 'web_search_2025_08_26';
+  }
+
+  /**
+   * Forces the model to call a specific function.
+   */
+  export interface OpenAIResponseInputToolChoiceFunctionTool {
+    name: string;
+
+    type?: 'function';
+  }
+
+  /**
+   * Forces the model to call a specific tool on a remote MCP server
+   */
+  export interface OpenAIResponseInputToolChoiceMcpTool {
+    server_label: string;
+
+    name?: string | null;
+
+    type?: 'mcp';
+  }
+
+  /**
+   * Forces the model to call a custom tool.
+   */
+  export interface OpenAIResponseInputToolChoiceCustomTool {
+    name: string;
+
+    type?: 'custom';
+  }
+
+  /**
    * Web search tool configuration for OpenAI response inputs.
    */
   export interface OpenAIResponseInputToolWebSearch {
@@ -3569,6 +4385,22 @@ export namespace ResponseCreateParams {
 
     /**
      * Options for ranking and filtering search results.
+     *
+     * This class configures how search results are ranked and filtered. You can use
+     * algorithm-based rerankers (weighted, RRF) or neural rerankers. Defaults from
+     * VectorStoresConfig are used when parameters are not provided.
+     *
+     * Examples: # Weighted ranker with custom alpha
+     * SearchRankingOptions(ranker="weighted", alpha=0.7)
+     *
+     *     # RRF ranker with custom impact factor
+     *     SearchRankingOptions(ranker="rrf", impact_factor=50.0)
+     *
+     *     # Use config defaults (just specify ranker type)
+     *     SearchRankingOptions(ranker="weighted")  # Uses alpha from VectorStoresConfig
+     *
+     *     # Score threshold filtering
+     *     SearchRankingOptions(ranker="weighted", score_threshold=0.5)
      */
     ranking_options?: OpenAIResponseInputToolFileSearch.RankingOptions | null;
 
@@ -3578,11 +4410,48 @@ export namespace ResponseCreateParams {
   export namespace OpenAIResponseInputToolFileSearch {
     /**
      * Options for ranking and filtering search results.
+     *
+     * This class configures how search results are ranked and filtered. You can use
+     * algorithm-based rerankers (weighted, RRF) or neural rerankers. Defaults from
+     * VectorStoresConfig are used when parameters are not provided.
+     *
+     * Examples: # Weighted ranker with custom alpha
+     * SearchRankingOptions(ranker="weighted", alpha=0.7)
+     *
+     *     # RRF ranker with custom impact factor
+     *     SearchRankingOptions(ranker="rrf", impact_factor=50.0)
+     *
+     *     # Use config defaults (just specify ranker type)
+     *     SearchRankingOptions(ranker="weighted")  # Uses alpha from VectorStoresConfig
+     *
+     *     # Score threshold filtering
+     *     SearchRankingOptions(ranker="weighted", score_threshold=0.5)
      */
     export interface RankingOptions {
+      /**
+       * Weight factor for weighted ranker
+       */
+      alpha?: number | null;
+
+      /**
+       * Impact factor for RRF algorithm
+       */
+      impact_factor?: number | null;
+
+      /**
+       * Model identifier for neural reranker
+       */
+      model?: string | null;
+
       ranker?: string | null;
 
       score_threshold?: number | null;
+
+      /**
+       * Weights for combining vector, keyword, and neural scores. Keys: 'vector',
+       * 'keyword', 'neural'
+       */
+      weights?: { [key: string]: number } | null;
     }
   }
 
@@ -3607,8 +4476,6 @@ export namespace ResponseCreateParams {
   export interface OpenAIResponseInputToolMcp {
     server_label: string;
 
-    server_url: string;
-
     /**
      * Filter configuration for restricting which MCP tools can be used.
      */
@@ -3616,12 +4483,16 @@ export namespace ResponseCreateParams {
 
     authorization?: string | null;
 
+    connector_id?: string | null;
+
     headers?: { [key: string]: unknown } | null;
 
     /**
      * Filter configuration for MCP tool approval requirements.
      */
     require_approval?: 'always' | 'never' | OpenAIResponseInputToolMcp.ApprovalFilter;
+
+    server_url?: string | null;
 
     type?: 'mcp';
   }
@@ -3649,14 +4520,23 @@ export namespace ResponseCreateParams {
 }
 
 export interface ResponseCreateParamsNonStreaming extends ResponseCreateParamsBase {
+  /**
+   * Whether to stream the response.
+   */
   stream?: false | null;
 }
 
 export interface ResponseCreateParamsStreaming extends ResponseCreateParamsBase {
+  /**
+   * Whether to stream the response.
+   */
   stream: true;
 }
 
 export interface ResponseListParams extends OpenAICursorPageParams {
+  /**
+   * The model to filter responses by.
+   */
   model?: string | null;
 
   /**

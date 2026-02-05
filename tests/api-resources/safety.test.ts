@@ -15,8 +15,7 @@ describe('resource safety', () => {
   test('runShield: only required params', async () => {
     const responsePromise = client.safety.runShield({
       messages: [{ content: 'string', role: 'user' }],
-      params: { foo: 'bar' },
-      shield_id: 'shield_id',
+      shield_id: 'x',
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -29,9 +28,14 @@ describe('resource safety', () => {
 
   test('runShield: required and optional params', async () => {
     const response = await client.safety.runShield({
-      messages: [{ content: 'string', name: 'name', role: 'user' }],
-      params: { foo: 'bar' },
-      shield_id: 'shield_id',
+      messages: [
+        {
+          content: 'string',
+          name: 'name',
+          role: 'user',
+        },
+      ],
+      shield_id: 'x',
     });
   });
 });

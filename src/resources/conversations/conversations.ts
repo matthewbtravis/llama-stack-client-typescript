@@ -25,16 +25,12 @@ export class Conversations extends APIResource {
 
   /**
    * Create a conversation.
-   *
-   * Create a conversation.
    */
   create(body: ConversationCreateParams, options?: Core.RequestOptions): Core.APIPromise<ConversationObject> {
     return this._client.post('/v1/conversations', { body, ...options });
   }
 
   /**
-   * Retrieve a conversation.
-   *
    * Get a conversation with the given ID.
    */
   retrieve(conversationId: string, options?: Core.RequestOptions): Core.APIPromise<ConversationObject> {
@@ -42,8 +38,6 @@ export class Conversations extends APIResource {
   }
 
   /**
-   * Update a conversation.
-   *
    * Update a conversation's metadata with the given ID.
    */
   update(
@@ -55,8 +49,6 @@ export class Conversations extends APIResource {
   }
 
   /**
-   * Delete a conversation.
-   *
    * Delete a conversation with the given ID.
    */
   delete(conversationId: string, options?: Core.RequestOptions): Core.APIPromise<ConversationDeleteResponse> {
@@ -119,6 +111,9 @@ export interface ConversationDeleteResponse {
 }
 
 export interface ConversationCreateParams {
+  /**
+   * Initial items to include in the conversation context.
+   */
   items?: Array<
     | ConversationCreateParams.OpenAIResponseMessageInput
     | ConversationCreateParams.OpenAIResponseOutputMessageWebSearchToolCall
@@ -131,6 +126,9 @@ export interface ConversationCreateParams {
     | ConversationCreateParams.OpenAIResponseOutputMessageMcpListTools
   > | null;
 
+  /**
+   * Set of key-value pairs that can be attached to an object.
+   */
   metadata?: { [key: string]: string } | null;
 }
 
@@ -149,7 +147,7 @@ export namespace ConversationCreateParams {
           | OpenAIResponseMessageInput.OpenAIResponseInputMessageContentFile
         >
       | Array<
-          | OpenAIResponseMessageInput.OpenAIResponseOutputMessageContentOutputText
+          | OpenAIResponseMessageInput.OpenAIResponseOutputMessageContentOutputTextInput
           | OpenAIResponseMessageInput.OpenAIResponseContentPartRefusal
         >;
 
@@ -200,20 +198,22 @@ export namespace ConversationCreateParams {
       type?: 'input_file';
     }
 
-    export interface OpenAIResponseOutputMessageContentOutputText {
+    export interface OpenAIResponseOutputMessageContentOutputTextInput {
       text: string;
 
       annotations?: Array<
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationContainerFileCitation
-        | OpenAIResponseOutputMessageContentOutputText.OpenAIResponseAnnotationFilePath
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationCitation
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationContainerFileCitation
+        | OpenAIResponseOutputMessageContentOutputTextInput.OpenAIResponseAnnotationFilePath
       >;
+
+      logprobs?: Array<OpenAIResponseOutputMessageContentOutputTextInput.Logprob> | null;
 
       type?: 'output_text';
     }
 
-    export namespace OpenAIResponseOutputMessageContentOutputText {
+    export namespace OpenAIResponseOutputMessageContentOutputTextInput {
       /**
        * File citation annotation for referencing specific files in response content.
        */
@@ -262,6 +262,55 @@ export namespace ConversationCreateParams {
         index: number;
 
         type?: 'file_path';
+      }
+
+      /**
+       * The log probability for a token from an OpenAI-compatible chat completion
+       * response.
+       */
+      export interface Logprob {
+        /**
+         * The token.
+         */
+        token: string;
+
+        /**
+         * The log probability of the token.
+         */
+        logprob: number;
+
+        /**
+         * The bytes for the token.
+         */
+        bytes?: Array<number> | null;
+
+        /**
+         * The top log probabilities for the token.
+         */
+        top_logprobs?: Array<Logprob.TopLogprob> | null;
+      }
+
+      export namespace Logprob {
+        /**
+         * The top log probability for a token from an OpenAI-compatible chat completion
+         * response.
+         */
+        export interface TopLogprob {
+          /**
+           * The token.
+           */
+          token: string;
+
+          /**
+           * The log probability of the token.
+           */
+          logprob: number;
+
+          /**
+           * The bytes for the token.
+           */
+          bytes?: Array<number> | null;
+        }
       }
     }
 
@@ -428,6 +477,9 @@ export namespace ConversationCreateParams {
 }
 
 export interface ConversationUpdateParams {
+  /**
+   * Set of key-value pairs that can be attached to an object.
+   */
   metadata: { [key: string]: string };
 }
 

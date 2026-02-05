@@ -14,7 +14,12 @@ const client = new LlamaStackClient({ baseURL: process.env['TEST_API_BASE_URL'] 
 describe('resource eval', () => {
   test('evaluateRows: only required params', async () => {
     const responsePromise = client.alpha.eval.evaluateRows('benchmark_id', {
-      benchmark_config: { eval_candidate: { model: 'model', sampling_params: {} } },
+      benchmark_config: {
+        eval_candidate: {
+          model: 'x',
+          sampling_params: {},
+        },
+      },
       input_rows: [{ foo: 'bar' }],
       scoring_functions: ['string'],
     });
@@ -31,17 +36,17 @@ describe('resource eval', () => {
     const response = await client.alpha.eval.evaluateRows('benchmark_id', {
       benchmark_config: {
         eval_candidate: {
-          model: 'model',
+          model: 'x',
           sampling_params: {
-            max_tokens: 0,
-            repetition_penalty: 0,
+            max_tokens: 1,
+            repetition_penalty: -2,
             stop: ['string'],
             strategy: { type: 'greedy' },
           },
           system_message: { content: 'string', role: 'system' },
           type: 'model',
         },
-        num_examples: 0,
+        num_examples: 1,
         scoring_params: {
           foo: {
             judge_model: 'judge_model',
@@ -59,7 +64,12 @@ describe('resource eval', () => {
 
   test('evaluateRowsAlpha: only required params', async () => {
     const responsePromise = client.alpha.eval.evaluateRowsAlpha('benchmark_id', {
-      benchmark_config: { eval_candidate: { model: 'model', sampling_params: {} } },
+      benchmark_config: {
+        eval_candidate: {
+          model: 'x',
+          sampling_params: {},
+        },
+      },
       input_rows: [{ foo: 'bar' }],
       scoring_functions: ['string'],
     });
@@ -76,17 +86,17 @@ describe('resource eval', () => {
     const response = await client.alpha.eval.evaluateRowsAlpha('benchmark_id', {
       benchmark_config: {
         eval_candidate: {
-          model: 'model',
+          model: 'x',
           sampling_params: {
-            max_tokens: 0,
-            repetition_penalty: 0,
+            max_tokens: 1,
+            repetition_penalty: -2,
             stop: ['string'],
             strategy: { type: 'greedy' },
           },
           system_message: { content: 'string', role: 'system' },
           type: 'model',
         },
-        num_examples: 0,
+        num_examples: 1,
         scoring_params: {
           foo: {
             judge_model: 'judge_model',
@@ -104,7 +114,12 @@ describe('resource eval', () => {
 
   test('runEval: only required params', async () => {
     const responsePromise = client.alpha.eval.runEval('benchmark_id', {
-      benchmark_config: { eval_candidate: { model: 'model', sampling_params: {} } },
+      benchmark_config: {
+        eval_candidate: {
+          model: 'x',
+          sampling_params: {},
+        },
+      },
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -119,17 +134,17 @@ describe('resource eval', () => {
     const response = await client.alpha.eval.runEval('benchmark_id', {
       benchmark_config: {
         eval_candidate: {
-          model: 'model',
+          model: 'x',
           sampling_params: {
-            max_tokens: 0,
-            repetition_penalty: 0,
+            max_tokens: 1,
+            repetition_penalty: -2,
             stop: ['string'],
             strategy: { type: 'greedy' },
           },
           system_message: { content: 'string', role: 'system' },
           type: 'model',
         },
-        num_examples: 0,
+        num_examples: 1,
         scoring_params: {
           foo: {
             judge_model: 'judge_model',
@@ -145,7 +160,12 @@ describe('resource eval', () => {
 
   test('runEvalAlpha: only required params', async () => {
     const responsePromise = client.alpha.eval.runEvalAlpha('benchmark_id', {
-      benchmark_config: { eval_candidate: { model: 'model', sampling_params: {} } },
+      benchmark_config: {
+        eval_candidate: {
+          model: 'x',
+          sampling_params: {},
+        },
+      },
     });
     const rawResponse = await responsePromise.asResponse();
     expect(rawResponse).toBeInstanceOf(Response);
@@ -160,17 +180,17 @@ describe('resource eval', () => {
     const response = await client.alpha.eval.runEvalAlpha('benchmark_id', {
       benchmark_config: {
         eval_candidate: {
-          model: 'model',
+          model: 'x',
           sampling_params: {
-            max_tokens: 0,
-            repetition_penalty: 0,
+            max_tokens: 1,
+            repetition_penalty: -2,
             stop: ['string'],
             strategy: { type: 'greedy' },
           },
           system_message: { content: 'string', role: 'system' },
           type: 'model',
         },
-        num_examples: 0,
+        num_examples: 1,
         scoring_params: {
           foo: {
             judge_model: 'judge_model',
