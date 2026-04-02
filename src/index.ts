@@ -8,7 +8,7 @@
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
 import { type Agent } from './_shims/index';
-import * as qs from './internal/qs';
+import { stringifyQuery } from './internal/utils/query';
 import * as Core from './core';
 import * as Errors from './error';
 import * as Pagination from './pagination';
@@ -76,22 +76,6 @@ import {
   Shields,
 } from './resources/shields';
 import {
-  ToolDef,
-  ToolInvocationResult,
-  ToolRuntime,
-  ToolRuntimeInvokeToolParams,
-  ToolRuntimeListToolsParams,
-  ToolRuntimeListToolsResponse,
-} from './resources/tool-runtime';
-import {
-  ListToolGroupsResponse,
-  ToolGroup,
-  ToolgroupListResponse,
-  ToolgroupRegisterParams,
-  Toolgroups,
-} from './resources/toolgroups';
-import { ToolListParams, ToolListResponse, Tools } from './resources/tools';
-import {
   QueryChunksResponse,
   VectorIo,
   VectorIoInsertParams,
@@ -111,8 +95,6 @@ import {
   ListModelsResponse,
   Model,
   ModelListResponse,
-  ModelRegisterParams,
-  ModelRegisterResponse,
   ModelRetrieveResponse,
   Models,
 } from './resources/models/models';
@@ -261,27 +243,72 @@ export class LlamaStackClient extends Core.APIClient {
     this.apiKey = apiKey;
   }
 
-  toolgroups: API.Toolgroups = new API.Toolgroups(this);
-  tools: API.Tools = new API.Tools(this);
-  toolRuntime: API.ToolRuntime = new API.ToolRuntime(this);
   responses: API.Responses = new API.Responses(this);
+  /**
+   * Protocol for prompt management operations.
+   */
   prompts: API.Prompts = new API.Prompts(this);
+  /**
+   * Protocol for conversation management operations.
+   */
   conversations: API.Conversations = new API.Conversations(this);
+  /**
+   * APIs for inspecting the Llama Stack service, including health status, available API routes with methods and implementing providers.
+   */
   inspect: API.Inspect = new API.Inspect(this);
+  /**
+   * Llama Stack Inference API for generating completions, chat completions, and embeddings.
+   *
+   * This API provides the raw interface to the underlying models. Three kinds of models are supported:
+   * - LLM models: these models generate "raw" and "chat" (conversational) completions.
+   * - Embedding models: these models generate embeddings to be used for semantic search.
+   * - Rerank models: these models reorder the documents based on their relevance to a query.
+   */
   embeddings: API.Embeddings = new API.Embeddings(this);
   chat: API.Chat = new API.Chat(this);
+  /**
+   * Llama Stack Inference API for generating completions, chat completions, and embeddings.
+   *
+   * This API provides the raw interface to the underlying models. Three kinds of models are supported:
+   * - LLM models: these models generate "raw" and "chat" (conversational) completions.
+   * - Embedding models: these models generate embeddings to be used for semantic search.
+   * - Rerank models: these models reorder the documents based on their relevance to a query.
+   */
   completions: API.Completions = new API.Completions(this);
   vectorIo: API.VectorIo = new API.VectorIo(this);
   vectorStores: API.VectorStores = new API.VectorStores(this);
   models: API.Models = new API.Models(this);
+  /**
+   * Providers API for inspecting, listing, and modifying providers and their configurations.
+   */
   providers: API.Providers = new API.Providers(this);
+  /**
+   * APIs for inspecting the Llama Stack service, including health status, available API routes with methods and implementing providers.
+   */
   routes: API.Routes = new API.Routes(this);
+  /**
+   * OpenAI-compatible Moderations API.
+   */
   moderations: API.Moderations = new API.Moderations(this);
+  /**
+   * OpenAI-compatible Moderations API.
+   */
   safety: API.Safety = new API.Safety(this);
   shields: API.Shields = new API.Shields(this);
   scoring: API.Scoring = new API.Scoring(this);
   scoringFunctions: API.ScoringFunctions = new API.ScoringFunctions(this);
+  /**
+   * This API is used to upload documents that can be used with other Llama Stack APIs.
+   */
   files: API.Files = new API.Files(this);
+  /**
+   * The API is designed to allow use of openai client libraries for seamless integration.
+   *
+   * This API provides the following extensions:
+   *  - idempotent batch creation
+   *
+   * Note: This API is currently under active development and may undergo changes.
+   */
   batches: API.Batches = new API.Batches(this);
   alpha: API.Alpha = new API.Alpha(this);
   beta: API.Beta = new API.Beta(this);
@@ -311,8 +338,8 @@ export class LlamaStackClient extends Core.APIClient {
     return { Authorization: `Bearer ${this.apiKey}` };
   }
 
-  protected override stringifyQuery(query: Record<string, unknown>): string {
-    return qs.stringify(query, { arrayFormat: 'comma' });
+  protected override stringifyQuery(query: object | Record<string, unknown>): string {
+    return stringifyQuery(query);
   }
 
   static LlamaStackClient = this;
@@ -336,9 +363,6 @@ export class LlamaStackClient extends Core.APIClient {
   static fileFromPath = Uploads.fileFromPath;
 }
 
-LlamaStackClient.Toolgroups = Toolgroups;
-LlamaStackClient.Tools = Tools;
-LlamaStackClient.ToolRuntime = ToolRuntime;
 LlamaStackClient.Responses = Responses;
 LlamaStackClient.ResponseListResponsesOpenAICursorPage = ResponseListResponsesOpenAICursorPage;
 LlamaStackClient.Prompts = Prompts;
@@ -378,25 +402,6 @@ export declare namespace LlamaStackClient {
   export {
     type OpenAICursorPageParams as OpenAICursorPageParams,
     type OpenAICursorPageResponse as OpenAICursorPageResponse,
-  };
-
-  export {
-    Toolgroups as Toolgroups,
-    type ListToolGroupsResponse as ListToolGroupsResponse,
-    type ToolGroup as ToolGroup,
-    type ToolgroupListResponse as ToolgroupListResponse,
-    type ToolgroupRegisterParams as ToolgroupRegisterParams,
-  };
-
-  export { Tools as Tools, type ToolListResponse as ToolListResponse, type ToolListParams as ToolListParams };
-
-  export {
-    ToolRuntime as ToolRuntime,
-    type ToolDef as ToolDef,
-    type ToolInvocationResult as ToolInvocationResult,
-    type ToolRuntimeListToolsResponse as ToolRuntimeListToolsResponse,
-    type ToolRuntimeInvokeToolParams as ToolRuntimeInvokeToolParams,
-    type ToolRuntimeListToolsParams as ToolRuntimeListToolsParams,
   };
 
   export {
@@ -475,8 +480,6 @@ export declare namespace LlamaStackClient {
     type Model as Model,
     type ModelRetrieveResponse as ModelRetrieveResponse,
     type ModelListResponse as ModelListResponse,
-    type ModelRegisterResponse as ModelRegisterResponse,
-    type ModelRegisterParams as ModelRegisterParams,
   };
 
   export { Providers as Providers, type ProviderListResponse as ProviderListResponse };

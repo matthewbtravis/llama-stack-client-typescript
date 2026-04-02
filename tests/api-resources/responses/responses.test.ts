@@ -27,7 +27,9 @@ describe('resource responses', () => {
     const response = await client.responses.create({
       input: 'string',
       model: 'model',
+      background: true,
       conversation: 'conversation',
+      frequency_penalty: -2,
       guardrails: ['string'],
       include: ['web_search_call.action.sources'],
       instructions: 'instructions',
@@ -36,16 +38,20 @@ describe('resource responses', () => {
       max_tool_calls: 1,
       metadata: { foo: 'string' },
       parallel_tool_calls: true,
+      presence_penalty: -2,
       previous_response_id: 'previous_response_id',
       prompt: {
         id: 'id',
         variables: { foo: { text: 'text', type: 'input_text' } },
         version: 'version',
       },
-      reasoning: { effort: 'none' },
+      prompt_cache_key: 'prompt_cache_key',
+      reasoning: { effort: 'none', summary: 'auto' },
       safety_identifier: 'safety_identifier',
+      service_tier: 'auto',
       store: true,
       stream: false,
+      stream_options: { include_obfuscation: true },
       temperature: 0,
       text: {
         format: {
@@ -58,6 +64,9 @@ describe('resource responses', () => {
       },
       tool_choice: 'auto',
       tools: [{ search_context_size: 'S?oC"high', type: 'web_search' }],
+      top_logprobs: 0,
+      top_p: 0,
+      truncation: 'auto',
     });
   });
 

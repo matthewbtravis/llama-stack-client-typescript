@@ -53,7 +53,17 @@ export interface ChatCompletionChunk {
   object?: 'chat.completion.chunk';
 
   /**
-   * Usage information for OpenAI chat completion.
+   * The service tier that was used for this response.
+   */
+  service_tier?: string | null;
+
+  /**
+   * System fingerprint for this completion chunk.
+   */
+  system_fingerprint?: string | null;
+
+  /**
+   * Token usage information (typically included in final chunk with stream_options).
    */
   usage?: ChatCompletionChunk.Usage | null;
 }
@@ -79,10 +89,9 @@ export namespace ChatCompletionChunk {
     finish_reason?: 'stop' | 'length' | 'tool_calls' | 'content_filter' | 'function_call' | null;
 
     /**
-     * The log probabilities for the tokens in the message from an OpenAI-compatible
-     * chat completion response.
+     * The log probabilities for the tokens in the message.
      */
-    logprobs?: Choice.Logprobs | null;
+    logprobs?: Choice.Logprobs;
   }
 
   export namespace Choice {
@@ -108,7 +117,7 @@ export namespace ChatCompletionChunk {
       /**
        * The role of the delta.
        */
-      role?: string | null;
+      role?: 'developer' | 'system' | 'user' | 'assistant' | 'tool' | null;
 
       /**
        * The tool calls of the delta.
@@ -124,45 +133,39 @@ export namespace ChatCompletionChunk {
         /**
          * Unique identifier for the tool call.
          */
-        id?: string | null;
+        id: string;
 
         /**
-         * Function call details for OpenAI-compatible tool calls.
+         * Function call details.
          */
-        function?: ToolCall.Function | null;
-
-        /**
-         * Index of the tool call in the list.
-         */
-        index?: number | null;
+        function: ToolCall.Function;
 
         /**
          * Must be 'function' to identify this as a function call.
          */
-        type?: 'function';
+        type: 'function';
       }
 
       export namespace ToolCall {
         /**
-         * Function call details for OpenAI-compatible tool calls.
+         * Function call details.
          */
         export interface Function {
           /**
            * Arguments to pass to the function as a JSON string.
            */
-          arguments?: string | null;
+          arguments: string;
 
           /**
            * Name of the function to call.
            */
-          name?: string | null;
+          name: string;
         }
       }
     }
 
     /**
-     * The log probabilities for the tokens in the message from an OpenAI-compatible
-     * chat completion response.
+     * The log probabilities for the tokens in the message.
      */
     export interface Logprobs {
       /**
@@ -278,54 +281,54 @@ export namespace ChatCompletionChunk {
   }
 
   /**
-   * Usage information for OpenAI chat completion.
+   * Token usage information (typically included in final chunk with stream_options).
    */
   export interface Usage {
     /**
      * Number of tokens in the completion.
      */
-    completion_tokens: number;
+    completion_tokens?: number;
+
+    /**
+     * Detailed breakdown of output token usage.
+     */
+    completion_tokens_details?: Usage.CompletionTokensDetails;
 
     /**
      * Number of tokens in the prompt.
      */
-    prompt_tokens: number;
+    prompt_tokens?: number;
+
+    /**
+     * Detailed breakdown of input token usage.
+     */
+    prompt_tokens_details?: Usage.PromptTokensDetails;
 
     /**
      * Total tokens used (prompt + completion).
      */
-    total_tokens: number;
-
-    /**
-     * Token details for output tokens in OpenAI chat completion usage.
-     */
-    completion_tokens_details?: Usage.CompletionTokensDetails | null;
-
-    /**
-     * Token details for prompt tokens in OpenAI chat completion usage.
-     */
-    prompt_tokens_details?: Usage.PromptTokensDetails | null;
+    total_tokens?: number;
   }
 
   export namespace Usage {
     /**
-     * Token details for output tokens in OpenAI chat completion usage.
+     * Detailed breakdown of output token usage.
      */
     export interface CompletionTokensDetails {
       /**
        * Number of tokens used for reasoning (o1/o3 models).
        */
-      reasoning_tokens?: number | null;
+      reasoning_tokens?: number;
     }
 
     /**
-     * Token details for prompt tokens in OpenAI chat completion usage.
+     * Detailed breakdown of input token usage.
      */
     export interface PromptTokensDetails {
       /**
        * Number of tokens retrieved from cache.
        */
-      cached_tokens?: number | null;
+      cached_tokens?: number;
     }
   }
 }

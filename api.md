@@ -16,45 +16,6 @@ Types:
 - <code><a href="./src/resources/shared.ts">SystemMessage</a></code>
 - <code><a href="./src/resources/shared.ts">VersionInfo</a></code>
 
-# Toolgroups
-
-Types:
-
-- <code><a href="./src/resources/toolgroups.ts">ListToolGroupsResponse</a></code>
-- <code><a href="./src/resources/toolgroups.ts">ToolGroup</a></code>
-- <code><a href="./src/resources/toolgroups.ts">ToolgroupListResponse</a></code>
-
-Methods:
-
-- <code title="get /v1/toolgroups">client.toolgroups.<a href="./src/resources/toolgroups.ts">list</a>() -> ToolgroupListResponse</code>
-- <code title="get /v1/toolgroups/{toolgroup_id}">client.toolgroups.<a href="./src/resources/toolgroups.ts">get</a>(toolgroupId) -> ToolGroup</code>
-- <code title="post /v1/toolgroups">client.toolgroups.<a href="./src/resources/toolgroups.ts">register</a>({ ...params }) -> void</code>
-- <code title="delete /v1/toolgroups/{toolgroup_id}">client.toolgroups.<a href="./src/resources/toolgroups.ts">unregister</a>(toolgroupId) -> void</code>
-
-# Tools
-
-Types:
-
-- <code><a href="./src/resources/tools.ts">ToolListResponse</a></code>
-
-Methods:
-
-- <code title="get /v1/tools">client.tools.<a href="./src/resources/tools.ts">list</a>({ ...params }) -> ToolListResponse</code>
-- <code title="get /v1/tools/{tool_name}">client.tools.<a href="./src/resources/tools.ts">get</a>(toolName) -> ToolDef</code>
-
-# ToolRuntime
-
-Types:
-
-- <code><a href="./src/resources/tool-runtime.ts">ToolDef</a></code>
-- <code><a href="./src/resources/tool-runtime.ts">ToolInvocationResult</a></code>
-- <code><a href="./src/resources/tool-runtime.ts">ToolRuntimeListToolsResponse</a></code>
-
-Methods:
-
-- <code title="post /v1/tool-runtime/invoke">client.toolRuntime.<a href="./src/resources/tool-runtime.ts">invokeTool</a>({ ...params }) -> ToolInvocationResult</code>
-- <code title="get /v1/tool-runtime/list-tools">client.toolRuntime.<a href="./src/resources/tool-runtime.ts">listTools</a>({ ...params }) -> ToolRuntimeListToolsResponse</code>
-
 # Responses
 
 Types:
@@ -249,14 +210,11 @@ Types:
 - <code><a href="./src/resources/models/models.ts">Model</a></code>
 - <code><a href="./src/resources/models/models.ts">ModelRetrieveResponse</a></code>
 - <code><a href="./src/resources/models/models.ts">ModelListResponse</a></code>
-- <code><a href="./src/resources/models/models.ts">ModelRegisterResponse</a></code>
 
 Methods:
 
 - <code title="get /v1/models/{model_id}">client.models.<a href="./src/resources/models/models.ts">retrieve</a>(modelId) -> ModelRetrieveResponse</code>
 - <code title="get /v1/models">client.models.<a href="./src/resources/models/models.ts">list</a>() -> ModelListResponse</code>
-- <code title="post /v1/models">client.models.<a href="./src/resources/models/models.ts">register</a>({ ...params }) -> ModelRegisterResponse</code>
-- <code title="delete /v1/models/{model_id}">client.models.<a href="./src/resources/models/models.ts">unregister</a>(modelId) -> void</code>
 
 ## OpenAI
 
@@ -363,7 +321,7 @@ Methods:
 - <code title="get /v1/files/{file_id}">client.files.<a href="./src/resources/files.ts">retrieve</a>(fileId) -> File</code>
 - <code title="get /v1/files">client.files.<a href="./src/resources/files.ts">list</a>({ ...params }) -> FilesOpenAICursorPage</code>
 - <code title="delete /v1/files/{file_id}">client.files.<a href="./src/resources/files.ts">delete</a>(fileId) -> DeleteFileResponse</code>
-- <code title="get /v1/files/{file_id}/content">client.files.<a href="./src/resources/files.ts">content</a>(fileId) -> unknown</code>
+- <code title="get /v1/files/{file_id}/content">client.files.<a href="./src/resources/files.ts">content</a>(fileId) -> string</code>
 
 # Batches
 
@@ -382,34 +340,6 @@ Methods:
 - <code title="post /v1/batches/{batch_id}/cancel">client.batches.<a href="./src/resources/batches.ts">cancel</a>(batchId) -> BatchCancelResponse</code>
 
 # Alpha
-
-## PostTraining
-
-Types:
-
-- <code><a href="./src/resources/alpha/post-training/post-training.ts">AlgorithmConfig</a></code>
-- <code><a href="./src/resources/alpha/post-training/post-training.ts">ListPostTrainingJobsResponse</a></code>
-- <code><a href="./src/resources/alpha/post-training/post-training.ts">PostTrainingJob</a></code>
-
-Methods:
-
-- <code title="post /v1alpha/post-training/preference-optimize">client.alpha.postTraining.<a href="./src/resources/alpha/post-training/post-training.ts">preferenceOptimize</a>({ ...params }) -> PostTrainingJob</code>
-- <code title="post /v1alpha/post-training/supervised-fine-tune">client.alpha.postTraining.<a href="./src/resources/alpha/post-training/post-training.ts">supervisedFineTune</a>({ ...params }) -> PostTrainingJob</code>
-
-### Job
-
-Types:
-
-- <code><a href="./src/resources/alpha/post-training/job.ts">JobListResponse</a></code>
-- <code><a href="./src/resources/alpha/post-training/job.ts">JobArtifactsResponse</a></code>
-- <code><a href="./src/resources/alpha/post-training/job.ts">JobStatusResponse</a></code>
-
-Methods:
-
-- <code title="get /v1alpha/post-training/jobs">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">list</a>() -> JobListResponse</code>
-- <code title="get /v1alpha/post-training/job/artifacts">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">artifacts</a>() -> JobArtifactsResponse</code>
-- <code title="post /v1alpha/post-training/job/cancel">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">cancel</a>() -> void</code>
-- <code title="get /v1alpha/post-training/job/status">client.alpha.postTraining.job.<a href="./src/resources/alpha/post-training/job.ts">status</a>() -> JobStatusResponse</code>
 
 ## Benchmarks
 

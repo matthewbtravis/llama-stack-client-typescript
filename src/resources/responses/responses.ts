@@ -98,11 +98,14 @@ export interface ResponseObject {
     | ResponseObject.OpenAIResponseOutputMessageMcpCall
     | ResponseObject.OpenAIResponseOutputMessageMcpListTools
     | ResponseObject.OpenAIResponseMcpApprovalRequest
+    | ResponseObject.OpenAIResponseOutputMessageReasoningItem
   >;
 
   status: string;
 
   store: boolean;
+
+  background?: boolean;
 
   completed_at?: number | null;
 
@@ -110,6 +113,13 @@ export interface ResponseObject {
    * Error details for failed OpenAI response requests.
    */
   error?: ResponseObject.Error | null;
+
+  frequency_penalty?: number | null;
+
+  /**
+   * Details explaining why a response was incomplete.
+   */
+  incomplete_details?: ResponseObject.IncompleteDetails | null;
 
   instructions?: string | null;
 
@@ -123,12 +133,16 @@ export interface ResponseObject {
 
   parallel_tool_calls?: boolean | null;
 
+  presence_penalty?: number | null;
+
   previous_response_id?: string | null;
 
   /**
    * OpenAI compatible Prompt object that is used in OpenAI responses.
    */
   prompt?: ResponseObject.Prompt | null;
+
+  prompt_cache_key?: string | null;
 
   /**
    * Configuration for reasoning effort in OpenAI responses.
@@ -139,6 +153,8 @@ export interface ResponseObject {
 
   safety_identifier?: string | null;
 
+  service_tier?: string | null;
+
   temperature?: number | null;
 
   /**
@@ -147,7 +163,7 @@ export interface ResponseObject {
   text?: ResponseObject.Text;
 
   /**
-   * Constrains the tools available to the model to a pre-defined set.
+   * Enumeration of simple tool choice modes for response generation.
    */
   tool_choice?:
     | 'auto'
@@ -167,6 +183,8 @@ export interface ResponseObject {
     | ResponseObject.OpenAIResponseInputToolFunction
     | ResponseObject.OpenAIResponseToolMcp
   > | null;
+
+  top_logprobs?: number | null;
 
   top_p?: number | null;
 
@@ -244,6 +262,9 @@ export namespace ResponseObject {
       type?: 'input_file';
     }
 
+    /**
+     * Text content within an output message of an OpenAI response.
+     */
     export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
@@ -288,6 +309,9 @@ export namespace ResponseObject {
         type?: 'url_citation';
       }
 
+      /**
+       * Container file citation annotation referencing a file within a container.
+       */
       export interface OpenAIResponseAnnotationContainerFileCitation {
         container_id: string;
 
@@ -302,6 +326,9 @@ export namespace ResponseObject {
         type?: 'container_file_citation';
       }
 
+      /**
+       * File path annotation referencing a generated file in response content.
+       */
       export interface OpenAIResponseAnnotationFilePath {
         file_id: string;
 
@@ -491,12 +518,81 @@ export namespace ResponseObject {
   }
 
   /**
+   * Reasoning output from the model, representing the model's thinking process.
+   */
+  export interface OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * Unique identifier for the reasoning output item.
+     */
+    id: string;
+
+    /**
+     * Summary of the reasoning output.
+     */
+    summary: Array<OpenAIResponseOutputMessageReasoningItem.Summary>;
+
+    /**
+     * The reasoning content from the model.
+     */
+    content?: Array<OpenAIResponseOutputMessageReasoningItem.Content> | null;
+
+    /**
+     * The status of the reasoning output.
+     */
+    status?: 'in_progress' | 'completed' | 'incomplete' | null;
+
+    /**
+     * The type identifier, always 'reasoning'.
+     */
+    type?: 'reasoning';
+  }
+
+  export namespace OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * A summary of reasoning output from the model.
+     */
+    export interface Summary {
+      /**
+       * The summary text of the reasoning output.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'summary_text'.
+       */
+      type?: 'summary_text';
+    }
+
+    /**
+     * Reasoning text from the model.
+     */
+    export interface Content {
+      /**
+       * The reasoning text content from the model.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'reasoning_text'.
+       */
+      type?: 'reasoning_text';
+    }
+  }
+
+  /**
    * Error details for failed OpenAI response requests.
    */
   export interface Error {
     code: string;
 
     message: string;
+  }
+
+  /**
+   * Details explaining why a response was incomplete.
+   */
+  export interface IncompleteDetails {
+    reason: string;
   }
 
   /**
@@ -561,6 +657,11 @@ export namespace ResponseObject {
    */
   export interface Reasoning {
     effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+
+    /**
+     * Summary mode for reasoning output. One of 'auto', 'concise', or 'detailed'.
+     */
+    summary?: 'auto' | 'concise' | 'detailed' | null;
   }
 
   /**
@@ -862,6 +963,8 @@ export namespace ResponseObjectStream {
      */
     response: ResponsesAPI.ResponseObject;
 
+    sequence_number: number;
+
     type?: 'response.created';
   }
 
@@ -895,7 +998,8 @@ export namespace ResponseObjectStream {
       | OpenAIResponseObjectStreamResponseOutputItemAdded.OpenAIResponseOutputMessageFunctionToolCall
       | OpenAIResponseObjectStreamResponseOutputItemAdded.OpenAIResponseOutputMessageMcpCall
       | OpenAIResponseObjectStreamResponseOutputItemAdded.OpenAIResponseOutputMessageMcpListTools
-      | OpenAIResponseObjectStreamResponseOutputItemAdded.OpenAIResponseMcpApprovalRequest;
+      | OpenAIResponseObjectStreamResponseOutputItemAdded.OpenAIResponseMcpApprovalRequest
+      | OpenAIResponseObjectStreamResponseOutputItemAdded.OpenAIResponseOutputMessageReasoningItem;
 
     output_index: number;
 
@@ -972,6 +1076,9 @@ export namespace ResponseObjectStream {
         type?: 'input_file';
       }
 
+      /**
+       * Text content within an output message of an OpenAI response.
+       */
       export interface OpenAIResponseOutputMessageContentOutputText {
         text: string;
 
@@ -1016,6 +1123,9 @@ export namespace ResponseObjectStream {
           type?: 'url_citation';
         }
 
+        /**
+         * Container file citation annotation referencing a file within a container.
+         */
         export interface OpenAIResponseAnnotationContainerFileCitation {
           container_id: string;
 
@@ -1030,6 +1140,9 @@ export namespace ResponseObjectStream {
           type?: 'container_file_citation';
         }
 
+        /**
+         * File path annotation referencing a generated file in response content.
+         */
         export interface OpenAIResponseAnnotationFilePath {
           file_id: string;
 
@@ -1217,6 +1330,68 @@ export namespace ResponseObjectStream {
 
       type?: 'mcp_approval_request';
     }
+
+    /**
+     * Reasoning output from the model, representing the model's thinking process.
+     */
+    export interface OpenAIResponseOutputMessageReasoningItem {
+      /**
+       * Unique identifier for the reasoning output item.
+       */
+      id: string;
+
+      /**
+       * Summary of the reasoning output.
+       */
+      summary: Array<OpenAIResponseOutputMessageReasoningItem.Summary>;
+
+      /**
+       * The reasoning content from the model.
+       */
+      content?: Array<OpenAIResponseOutputMessageReasoningItem.Content> | null;
+
+      /**
+       * The status of the reasoning output.
+       */
+      status?: 'in_progress' | 'completed' | 'incomplete' | null;
+
+      /**
+       * The type identifier, always 'reasoning'.
+       */
+      type?: 'reasoning';
+    }
+
+    export namespace OpenAIResponseOutputMessageReasoningItem {
+      /**
+       * A summary of reasoning output from the model.
+       */
+      export interface Summary {
+        /**
+         * The summary text of the reasoning output.
+         */
+        text: string;
+
+        /**
+         * The type identifier, always 'summary_text'.
+         */
+        type?: 'summary_text';
+      }
+
+      /**
+       * Reasoning text from the model.
+       */
+      export interface Content {
+        /**
+         * The reasoning text content from the model.
+         */
+        text: string;
+
+        /**
+         * The type identifier, always 'reasoning_text'.
+         */
+        type?: 'reasoning_text';
+      }
+    }
   }
 
   /**
@@ -1235,7 +1410,8 @@ export namespace ResponseObjectStream {
       | OpenAIResponseObjectStreamResponseOutputItemDone.OpenAIResponseOutputMessageFunctionToolCall
       | OpenAIResponseObjectStreamResponseOutputItemDone.OpenAIResponseOutputMessageMcpCall
       | OpenAIResponseObjectStreamResponseOutputItemDone.OpenAIResponseOutputMessageMcpListTools
-      | OpenAIResponseObjectStreamResponseOutputItemDone.OpenAIResponseMcpApprovalRequest;
+      | OpenAIResponseObjectStreamResponseOutputItemDone.OpenAIResponseMcpApprovalRequest
+      | OpenAIResponseObjectStreamResponseOutputItemDone.OpenAIResponseOutputMessageReasoningItem;
 
     output_index: number;
 
@@ -1312,6 +1488,9 @@ export namespace ResponseObjectStream {
         type?: 'input_file';
       }
 
+      /**
+       * Text content within an output message of an OpenAI response.
+       */
       export interface OpenAIResponseOutputMessageContentOutputText {
         text: string;
 
@@ -1356,6 +1535,9 @@ export namespace ResponseObjectStream {
           type?: 'url_citation';
         }
 
+        /**
+         * Container file citation annotation referencing a file within a container.
+         */
         export interface OpenAIResponseAnnotationContainerFileCitation {
           container_id: string;
 
@@ -1370,6 +1552,9 @@ export namespace ResponseObjectStream {
           type?: 'container_file_citation';
         }
 
+        /**
+         * File path annotation referencing a generated file in response content.
+         */
         export interface OpenAIResponseAnnotationFilePath {
           file_id: string;
 
@@ -1556,6 +1741,68 @@ export namespace ResponseObjectStream {
       server_label: string;
 
       type?: 'mcp_approval_request';
+    }
+
+    /**
+     * Reasoning output from the model, representing the model's thinking process.
+     */
+    export interface OpenAIResponseOutputMessageReasoningItem {
+      /**
+       * Unique identifier for the reasoning output item.
+       */
+      id: string;
+
+      /**
+       * Summary of the reasoning output.
+       */
+      summary: Array<OpenAIResponseOutputMessageReasoningItem.Summary>;
+
+      /**
+       * The reasoning content from the model.
+       */
+      content?: Array<OpenAIResponseOutputMessageReasoningItem.Content> | null;
+
+      /**
+       * The status of the reasoning output.
+       */
+      status?: 'in_progress' | 'completed' | 'incomplete' | null;
+
+      /**
+       * The type identifier, always 'reasoning'.
+       */
+      type?: 'reasoning';
+    }
+
+    export namespace OpenAIResponseOutputMessageReasoningItem {
+      /**
+       * A summary of reasoning output from the model.
+       */
+      export interface Summary {
+        /**
+         * The summary text of the reasoning output.
+         */
+        text: string;
+
+        /**
+         * The type identifier, always 'summary_text'.
+         */
+        type?: 'summary_text';
+      }
+
+      /**
+       * Reasoning text from the model.
+       */
+      export interface Content {
+        /**
+         * The reasoning text content from the model.
+         */
+        text: string;
+
+        /**
+         * The type identifier, always 'reasoning_text'.
+         */
+        type?: 'reasoning_text';
+      }
     }
   }
 
@@ -1689,6 +1936,9 @@ export namespace ResponseObjectStream {
     type?: 'response.web_search_call.in_progress';
   }
 
+  /**
+   * Streaming event for web search calls currently searching.
+   */
   export interface OpenAIResponseObjectStreamResponseWebSearchCallSearching {
     item_id: string;
 
@@ -1712,24 +1962,36 @@ export namespace ResponseObjectStream {
     type?: 'response.web_search_call.completed';
   }
 
+  /**
+   * Streaming event for MCP list tools operation in progress.
+   */
   export interface OpenAIResponseObjectStreamResponseMcpListToolsInProgress {
     sequence_number: number;
 
     type?: 'response.mcp_list_tools.in_progress';
   }
 
+  /**
+   * Streaming event for a failed MCP list tools operation.
+   */
   export interface OpenAIResponseObjectStreamResponseMcpListToolsFailed {
     sequence_number: number;
 
     type?: 'response.mcp_list_tools.failed';
   }
 
+  /**
+   * Streaming event for a completed MCP list tools operation.
+   */
   export interface OpenAIResponseObjectStreamResponseMcpListToolsCompleted {
     sequence_number: number;
 
     type?: 'response.mcp_list_tools.completed';
   }
 
+  /**
+   * Streaming event for incremental MCP call argument updates.
+   */
   export interface OpenAIResponseObjectStreamResponseMcpCallArgumentsDelta {
     delta: string;
 
@@ -1742,6 +2004,9 @@ export namespace ResponseObjectStream {
     type?: 'response.mcp_call.arguments.delta';
   }
 
+  /**
+   * Streaming event for completed MCP call arguments.
+   */
   export interface OpenAIResponseObjectStreamResponseMcpCallArgumentsDone {
     arguments: string;
 
@@ -1858,6 +2123,9 @@ export namespace ResponseObjectStream {
         type?: 'url_citation';
       }
 
+      /**
+       * Container file citation annotation referencing a file within a container.
+       */
       export interface OpenAIResponseAnnotationContainerFileCitation {
         container_id: string;
 
@@ -1872,6 +2140,9 @@ export namespace ResponseObjectStream {
         type?: 'container_file_citation';
       }
 
+      /**
+       * File path annotation referencing a generated file in response content.
+       */
       export interface OpenAIResponseAnnotationFilePath {
         file_id: string;
 
@@ -2022,6 +2293,9 @@ export namespace ResponseObjectStream {
         type?: 'url_citation';
       }
 
+      /**
+       * Container file citation annotation referencing a file within a container.
+       */
       export interface OpenAIResponseAnnotationContainerFileCitation {
         container_id: string;
 
@@ -2036,6 +2310,9 @@ export namespace ResponseObjectStream {
         type?: 'container_file_citation';
       }
 
+      /**
+       * File path annotation referencing a generated file in response content.
+       */
       export interface OpenAIResponseAnnotationFilePath {
         file_id: string;
 
@@ -2332,6 +2609,9 @@ export namespace ResponseObjectStream {
       type?: 'url_citation';
     }
 
+    /**
+     * Container file citation annotation referencing a file within a container.
+     */
     export interface OpenAIResponseAnnotationContainerFileCitation {
       container_id: string;
 
@@ -2346,6 +2626,9 @@ export namespace ResponseObjectStream {
       type?: 'container_file_citation';
     }
 
+    /**
+     * File path annotation referencing a generated file in response content.
+     */
     export interface OpenAIResponseAnnotationFilePath {
       file_id: string;
 
@@ -2431,6 +2714,8 @@ export namespace ResponseObjectStream {
      */
     response: ResponsesAPI.ResponseObject;
 
+    sequence_number: number;
+
     type?: 'response.completed';
   }
 }
@@ -2451,6 +2736,7 @@ export interface ResponseListResponse {
     | ResponseListResponse.OpenAIResponseOutputMessageMcpCall
     | ResponseListResponse.OpenAIResponseOutputMessageMcpListTools
     | ResponseListResponse.OpenAIResponseMcpApprovalRequest
+    | ResponseListResponse.OpenAIResponseOutputMessageReasoningItem
     | ResponseListResponse.OpenAIResponseInputFunctionToolCallOutput
     | ResponseListResponse.OpenAIResponseMcpApprovalResponse
     | ResponseListResponse.OpenAIResponseMessageOutput
@@ -2466,11 +2752,14 @@ export interface ResponseListResponse {
     | ResponseListResponse.OpenAIResponseOutputMessageMcpCall
     | ResponseListResponse.OpenAIResponseOutputMessageMcpListTools
     | ResponseListResponse.OpenAIResponseMcpApprovalRequest
+    | ResponseListResponse.OpenAIResponseOutputMessageReasoningItem
   >;
 
   status: string;
 
   store: boolean;
+
+  background?: boolean;
 
   completed_at?: number | null;
 
@@ -2478,6 +2767,13 @@ export interface ResponseListResponse {
    * Error details for failed OpenAI response requests.
    */
   error?: ResponseListResponse.Error | null;
+
+  frequency_penalty?: number | null;
+
+  /**
+   * Details explaining why a response was incomplete.
+   */
+  incomplete_details?: ResponseListResponse.IncompleteDetails | null;
 
   instructions?: string | null;
 
@@ -2491,12 +2787,16 @@ export interface ResponseListResponse {
 
   parallel_tool_calls?: boolean | null;
 
+  presence_penalty?: number | null;
+
   previous_response_id?: string | null;
 
   /**
    * OpenAI compatible Prompt object that is used in OpenAI responses.
    */
   prompt?: ResponseListResponse.Prompt | null;
+
+  prompt_cache_key?: string | null;
 
   /**
    * Configuration for reasoning effort in OpenAI responses.
@@ -2507,6 +2807,8 @@ export interface ResponseListResponse {
 
   safety_identifier?: string | null;
 
+  service_tier?: string | null;
+
   temperature?: number | null;
 
   /**
@@ -2515,7 +2817,7 @@ export interface ResponseListResponse {
   text?: ResponseListResponse.Text;
 
   /**
-   * Constrains the tools available to the model to a pre-defined set.
+   * Enumeration of simple tool choice modes for response generation.
    */
   tool_choice?:
     | 'auto'
@@ -2535,6 +2837,8 @@ export interface ResponseListResponse {
     | ResponseListResponse.OpenAIResponseInputToolFunction
     | ResponseListResponse.OpenAIResponseToolMcp
   > | null;
+
+  top_logprobs?: number | null;
 
   top_p?: number | null;
 
@@ -2612,6 +2916,9 @@ export namespace ResponseListResponse {
       type?: 'input_file';
     }
 
+    /**
+     * Text content within an output message of an OpenAI response.
+     */
     export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
@@ -2656,6 +2963,9 @@ export namespace ResponseListResponse {
         type?: 'url_citation';
       }
 
+      /**
+       * Container file citation annotation referencing a file within a container.
+       */
       export interface OpenAIResponseAnnotationContainerFileCitation {
         container_id: string;
 
@@ -2670,6 +2980,9 @@ export namespace ResponseListResponse {
         type?: 'container_file_citation';
       }
 
+      /**
+       * File path annotation referencing a generated file in response content.
+       */
       export interface OpenAIResponseAnnotationFilePath {
         file_id: string;
 
@@ -2859,19 +3172,126 @@ export namespace ResponseListResponse {
   }
 
   /**
+   * Reasoning output from the model, representing the model's thinking process.
+   */
+  export interface OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * Unique identifier for the reasoning output item.
+     */
+    id: string;
+
+    /**
+     * Summary of the reasoning output.
+     */
+    summary: Array<OpenAIResponseOutputMessageReasoningItem.Summary>;
+
+    /**
+     * The reasoning content from the model.
+     */
+    content?: Array<OpenAIResponseOutputMessageReasoningItem.Content> | null;
+
+    /**
+     * The status of the reasoning output.
+     */
+    status?: 'in_progress' | 'completed' | 'incomplete' | null;
+
+    /**
+     * The type identifier, always 'reasoning'.
+     */
+    type?: 'reasoning';
+  }
+
+  export namespace OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * A summary of reasoning output from the model.
+     */
+    export interface Summary {
+      /**
+       * The summary text of the reasoning output.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'summary_text'.
+       */
+      type?: 'summary_text';
+    }
+
+    /**
+     * Reasoning text from the model.
+     */
+    export interface Content {
+      /**
+       * The reasoning text content from the model.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'reasoning_text'.
+       */
+      type?: 'reasoning_text';
+    }
+  }
+
+  /**
    * This represents the output of a function call that gets passed back to the
    * model.
    */
   export interface OpenAIResponseInputFunctionToolCallOutput {
     call_id: string;
 
-    output: string;
+    output:
+      | string
+      | Array<
+          | OpenAIResponseInputFunctionToolCallOutput.OpenAIResponseInputMessageContentText
+          | OpenAIResponseInputFunctionToolCallOutput.OpenAIResponseInputMessageContentImage
+          | OpenAIResponseInputFunctionToolCallOutput.OpenAIResponseInputMessageContentFile
+        >;
 
     id?: string | null;
 
     status?: string | null;
 
     type?: 'function_call_output';
+  }
+
+  export namespace OpenAIResponseInputFunctionToolCallOutput {
+    /**
+     * Text content for input messages in OpenAI response format.
+     */
+    export interface OpenAIResponseInputMessageContentText {
+      text: string;
+
+      type?: 'input_text';
+    }
+
+    /**
+     * Image content for input messages in OpenAI response format.
+     */
+    export interface OpenAIResponseInputMessageContentImage {
+      detail?: 'low' | 'high' | 'auto';
+
+      file_id?: string | null;
+
+      image_url?: string | null;
+
+      type?: 'input_image';
+    }
+
+    /**
+     * File content for input messages in OpenAI response format.
+     */
+    export interface OpenAIResponseInputMessageContentFile {
+      file_data?: string | null;
+
+      file_id?: string | null;
+
+      file_url?: string | null;
+
+      filename?: string | null;
+
+      type?: 'input_file';
+    }
   }
 
   /**
@@ -2954,6 +3374,9 @@ export namespace ResponseListResponse {
       type?: 'input_file';
     }
 
+    /**
+     * Text content within an output message of an OpenAI response.
+     */
     export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
@@ -2998,6 +3421,9 @@ export namespace ResponseListResponse {
         type?: 'url_citation';
       }
 
+      /**
+       * Container file citation annotation referencing a file within a container.
+       */
       export interface OpenAIResponseAnnotationContainerFileCitation {
         container_id: string;
 
@@ -3012,6 +3438,9 @@ export namespace ResponseListResponse {
         type?: 'container_file_citation';
       }
 
+      /**
+       * File path annotation referencing a generated file in response content.
+       */
       export interface OpenAIResponseAnnotationFilePath {
         file_id: string;
 
@@ -3145,6 +3574,9 @@ export namespace ResponseListResponse {
       type?: 'input_file';
     }
 
+    /**
+     * Text content within an output message of an OpenAI response.
+     */
     export interface OpenAIResponseOutputMessageContentOutputTextOutput {
       text: string;
 
@@ -3189,6 +3621,9 @@ export namespace ResponseListResponse {
         type?: 'url_citation';
       }
 
+      /**
+       * Container file citation annotation referencing a file within a container.
+       */
       export interface OpenAIResponseAnnotationContainerFileCitation {
         container_id: string;
 
@@ -3203,6 +3638,9 @@ export namespace ResponseListResponse {
         type?: 'container_file_citation';
       }
 
+      /**
+       * File path annotation referencing a generated file in response content.
+       */
       export interface OpenAIResponseAnnotationFilePath {
         file_id: string;
 
@@ -3392,12 +3830,81 @@ export namespace ResponseListResponse {
   }
 
   /**
+   * Reasoning output from the model, representing the model's thinking process.
+   */
+  export interface OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * Unique identifier for the reasoning output item.
+     */
+    id: string;
+
+    /**
+     * Summary of the reasoning output.
+     */
+    summary: Array<OpenAIResponseOutputMessageReasoningItem.Summary>;
+
+    /**
+     * The reasoning content from the model.
+     */
+    content?: Array<OpenAIResponseOutputMessageReasoningItem.Content> | null;
+
+    /**
+     * The status of the reasoning output.
+     */
+    status?: 'in_progress' | 'completed' | 'incomplete' | null;
+
+    /**
+     * The type identifier, always 'reasoning'.
+     */
+    type?: 'reasoning';
+  }
+
+  export namespace OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * A summary of reasoning output from the model.
+     */
+    export interface Summary {
+      /**
+       * The summary text of the reasoning output.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'summary_text'.
+       */
+      type?: 'summary_text';
+    }
+
+    /**
+     * Reasoning text from the model.
+     */
+    export interface Content {
+      /**
+       * The reasoning text content from the model.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'reasoning_text'.
+       */
+      type?: 'reasoning_text';
+    }
+  }
+
+  /**
    * Error details for failed OpenAI response requests.
    */
   export interface Error {
     code: string;
 
     message: string;
+  }
+
+  /**
+   * Details explaining why a response was incomplete.
+   */
+  export interface IncompleteDetails {
+    reason: string;
   }
 
   /**
@@ -3462,6 +3969,11 @@ export namespace ResponseListResponse {
    */
   export interface Reasoning {
     effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+
+    /**
+     * Summary mode for reasoning output. One of 'auto', 'concise', or 'detailed'.
+     */
+    summary?: 'auto' | 'concise' | 'detailed' | null;
   }
 
   /**
@@ -3739,6 +4251,7 @@ export interface ResponseCreateParamsBase {
         | ResponseCreateParams.OpenAIResponseOutputMessageMcpCall
         | ResponseCreateParams.OpenAIResponseOutputMessageMcpListTools
         | ResponseCreateParams.OpenAIResponseMcpApprovalRequest
+        | ResponseCreateParams.OpenAIResponseOutputMessageReasoningItem
         | ResponseCreateParams.OpenAIResponseInputFunctionToolCallOutput
         | ResponseCreateParams.OpenAIResponseMcpApprovalResponse
       >;
@@ -3749,9 +4262,20 @@ export interface ResponseCreateParamsBase {
   model: string;
 
   /**
+   * Whether to run the model response in the background. When true, returns
+   * immediately with status 'queued'.
+   */
+  background?: boolean;
+
+  /**
    * Optional ID of a conversation to add the response to.
    */
   conversation?: string | null;
+
+  /**
+   * Penalizes new tokens based on their frequency in the text so far.
+   */
+  frequency_penalty?: number | null;
 
   /**
    * List of guardrails to apply during response generation.
@@ -3802,6 +4326,11 @@ export interface ResponseCreateParamsBase {
   parallel_tool_calls?: boolean | null;
 
   /**
+   * Penalizes new tokens based on whether they appear in the text so far.
+   */
+  presence_penalty?: number | null;
+
+  /**
    * Optional ID of a previous response to continue from.
    */
   previous_response_id?: string | null;
@@ -3810,6 +4339,11 @@ export interface ResponseCreateParamsBase {
    * OpenAI compatible Prompt object that is used in OpenAI responses.
    */
   prompt?: ResponseCreateParams.Prompt | null;
+
+  /**
+   * A key to use when reading from or writing to the prompt cache.
+   */
+  prompt_cache_key?: string | null;
 
   /**
    * Configuration for reasoning effort in OpenAI responses.
@@ -3824,6 +4358,11 @@ export interface ResponseCreateParamsBase {
   safety_identifier?: string | null;
 
   /**
+   * The service tier for the request.
+   */
+  service_tier?: 'auto' | 'default' | 'flex' | 'priority' | null;
+
+  /**
    * Whether to store the response in the database.
    */
   store?: boolean | null;
@@ -3832,6 +4371,11 @@ export interface ResponseCreateParamsBase {
    * Whether to stream the response.
    */
   stream?: boolean | null;
+
+  /**
+   * Options that control streamed response behavior.
+   */
+  stream_options?: ResponseCreateParams.StreamOptions | null;
 
   /**
    * Sampling temperature.
@@ -3867,6 +4411,26 @@ export interface ResponseCreateParamsBase {
     | ResponseCreateParams.OpenAIResponseInputToolFunction
     | ResponseCreateParams.OpenAIResponseInputToolMcp
   > | null;
+
+  /**
+   * The number of most likely tokens to return at each position, along with their
+   * log probabilities.
+   */
+  top_logprobs?: number | null;
+
+  /**
+   * Nucleus sampling parameter that controls response diversity (lower values
+   * increase focus).
+   */
+  top_p?: number | null;
+
+  /**
+   * Controls how the service truncates input when it exceeds the model context
+   * window.
+   */
+  truncation?: 'auto' | 'disabled' | null;
+
+  [k: string]: unknown;
 }
 
 export namespace ResponseCreateParams {
@@ -3935,6 +4499,9 @@ export namespace ResponseCreateParams {
       type?: 'input_file';
     }
 
+    /**
+     * Text content within an output message of an OpenAI response.
+     */
     export interface OpenAIResponseOutputMessageContentOutputTextInput {
       text: string;
 
@@ -3979,6 +4546,9 @@ export namespace ResponseCreateParams {
         type?: 'url_citation';
       }
 
+      /**
+       * Container file citation annotation referencing a file within a container.
+       */
       export interface OpenAIResponseAnnotationContainerFileCitation {
         container_id: string;
 
@@ -3993,6 +4563,9 @@ export namespace ResponseCreateParams {
         type?: 'container_file_citation';
       }
 
+      /**
+       * File path annotation referencing a generated file in response content.
+       */
       export interface OpenAIResponseAnnotationFilePath {
         file_id: string;
 
@@ -4182,19 +4755,126 @@ export namespace ResponseCreateParams {
   }
 
   /**
+   * Reasoning output from the model, representing the model's thinking process.
+   */
+  export interface OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * Unique identifier for the reasoning output item.
+     */
+    id: string;
+
+    /**
+     * Summary of the reasoning output.
+     */
+    summary: Array<OpenAIResponseOutputMessageReasoningItem.Summary>;
+
+    /**
+     * The reasoning content from the model.
+     */
+    content?: Array<OpenAIResponseOutputMessageReasoningItem.Content> | null;
+
+    /**
+     * The status of the reasoning output.
+     */
+    status?: 'in_progress' | 'completed' | 'incomplete' | null;
+
+    /**
+     * The type identifier, always 'reasoning'.
+     */
+    type?: 'reasoning';
+  }
+
+  export namespace OpenAIResponseOutputMessageReasoningItem {
+    /**
+     * A summary of reasoning output from the model.
+     */
+    export interface Summary {
+      /**
+       * The summary text of the reasoning output.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'summary_text'.
+       */
+      type?: 'summary_text';
+    }
+
+    /**
+     * Reasoning text from the model.
+     */
+    export interface Content {
+      /**
+       * The reasoning text content from the model.
+       */
+      text: string;
+
+      /**
+       * The type identifier, always 'reasoning_text'.
+       */
+      type?: 'reasoning_text';
+    }
+  }
+
+  /**
    * This represents the output of a function call that gets passed back to the
    * model.
    */
   export interface OpenAIResponseInputFunctionToolCallOutput {
     call_id: string;
 
-    output: string;
+    output:
+      | string
+      | Array<
+          | OpenAIResponseInputFunctionToolCallOutput.OpenAIResponseInputMessageContentText
+          | OpenAIResponseInputFunctionToolCallOutput.OpenAIResponseInputMessageContentImage
+          | OpenAIResponseInputFunctionToolCallOutput.OpenAIResponseInputMessageContentFile
+        >;
 
     id?: string | null;
 
     status?: string | null;
 
     type?: 'function_call_output';
+  }
+
+  export namespace OpenAIResponseInputFunctionToolCallOutput {
+    /**
+     * Text content for input messages in OpenAI response format.
+     */
+    export interface OpenAIResponseInputMessageContentText {
+      text: string;
+
+      type?: 'input_text';
+    }
+
+    /**
+     * Image content for input messages in OpenAI response format.
+     */
+    export interface OpenAIResponseInputMessageContentImage {
+      detail?: 'low' | 'high' | 'auto';
+
+      file_id?: string | null;
+
+      image_url?: string | null;
+
+      type?: 'input_image';
+    }
+
+    /**
+     * File content for input messages in OpenAI response format.
+     */
+    export interface OpenAIResponseInputMessageContentFile {
+      file_data?: string | null;
+
+      file_id?: string | null;
+
+      file_url?: string | null;
+
+      filename?: string | null;
+
+      type?: 'input_file';
+    }
   }
 
   /**
@@ -4281,6 +4961,21 @@ export namespace ResponseCreateParams {
    */
   export interface Reasoning {
     effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
+
+    /**
+     * Summary mode for reasoning output. One of 'auto', 'concise', or 'detailed'.
+     */
+    summary?: 'auto' | 'concise' | 'detailed' | null;
+  }
+
+  /**
+   * Options that control streamed response behavior.
+   */
+  export interface StreamOptions {
+    /**
+     * Whether to obfuscate sensitive information in streamed output.
+     */
+    include_obfuscation?: boolean;
   }
 
   /**
@@ -4524,6 +5219,8 @@ export interface ResponseCreateParamsNonStreaming extends ResponseCreateParamsBa
    * Whether to stream the response.
    */
   stream?: false | null;
+
+  [k: string]: unknown;
 }
 
 export interface ResponseCreateParamsStreaming extends ResponseCreateParamsBase {
@@ -4531,6 +5228,8 @@ export interface ResponseCreateParamsStreaming extends ResponseCreateParamsBase 
    * Whether to stream the response.
    */
   stream: true;
+
+  [k: string]: unknown;
 }
 
 export interface ResponseListParams extends OpenAICursorPageParams {
@@ -4540,7 +5239,7 @@ export interface ResponseListParams extends OpenAICursorPageParams {
   model?: string | null;
 
   /**
-   * Sort order for paginated responses.
+   * The order to sort responses by when sorted by created_at ('asc' or 'desc').
    */
   order?: 'asc' | 'desc' | null;
 }

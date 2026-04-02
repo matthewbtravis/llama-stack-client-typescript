@@ -127,7 +127,8 @@ export interface VectorStoreFile {
    */
   chunking_strategy:
     | VectorStoreFile.VectorStoreChunkingStrategyAuto
-    | VectorStoreFile.VectorStoreChunkingStrategyStatic;
+    | VectorStoreFile.VectorStoreChunkingStrategyStatic
+    | VectorStoreFile.VectorStoreChunkingStrategyContextual;
 
   created_at: number;
 
@@ -186,6 +187,62 @@ export namespace VectorStoreFile {
   }
 
   /**
+   * Contextual chunking strategy that uses an LLM to situate chunks within the
+   * document.
+   */
+  export interface VectorStoreChunkingStrategyContextual {
+    /**
+     * Configuration for contextual chunking.
+     */
+    contextual: VectorStoreChunkingStrategyContextual.Contextual;
+
+    /**
+     * Strategy type identifier.
+     */
+    type?: 'contextual';
+  }
+
+  export namespace VectorStoreChunkingStrategyContextual {
+    /**
+     * Configuration for contextual chunking.
+     */
+    export interface Contextual {
+      /**
+       * Tokens to overlap between adjacent chunks. Must be less than
+       * max_chunk_size_tokens.
+       */
+      chunk_overlap_tokens?: number;
+
+      /**
+       * Prompt template for contextual retrieval. Uses WHOLE_DOCUMENT and CHUNK_CONTENT
+       * placeholders wrapped in double curly braces.
+       */
+      context_prompt?: string;
+
+      /**
+       * Maximum tokens per chunk. Suggested ~700 to allow room for prepended context.
+       */
+      max_chunk_size_tokens?: number;
+
+      /**
+       * Maximum concurrent LLM calls. Falls back to config default if not provided.
+       */
+      max_concurrency?: number | null;
+
+      /**
+       * LLM model for generating context. Falls back to
+       * VectorStoresConfig.contextual_retrieval_params.model if not provided.
+       */
+      model_id?: string | null;
+
+      /**
+       * Timeout per LLM call in seconds. Falls back to config default if not provided.
+       */
+      timeout_seconds?: number | null;
+    }
+  }
+
+  /**
    * Error information for failed vector store file processing.
    */
   export interface LastError {
@@ -232,7 +289,7 @@ export namespace FileContentResponse {
      * `ChunkMetadata` is backend metadata for a `Chunk` that is used to store
      * additional information about the chunk that will not be used in the context
      * during inference, but is required for backend functionality. The `ChunkMetadata`
-     * is set during chunk creation in `MemoryToolRuntimeImpl().insert()`and is not
+     * is set during chunk creation in `FileSearchToolRuntimeImpl().insert()`and is not
      * expected to change after. Use `Chunk.metadata` for metadata that will be used in
      * the context during inference.
      */
@@ -248,7 +305,7 @@ export namespace FileContentResponse {
      * `ChunkMetadata` is backend metadata for a `Chunk` that is used to store
      * additional information about the chunk that will not be used in the context
      * during inference, but is required for backend functionality. The `ChunkMetadata`
-     * is set during chunk creation in `MemoryToolRuntimeImpl().insert()`and is not
+     * is set during chunk creation in `FileSearchToolRuntimeImpl().insert()`and is not
      * expected to change after. Use `Chunk.metadata` for metadata that will be used in
      * the context during inference.
      */
@@ -291,6 +348,7 @@ export interface FileCreateParams {
   chunking_strategy?:
     | FileCreateParams.VectorStoreChunkingStrategyAuto
     | FileCreateParams.VectorStoreChunkingStrategyStatic
+    | FileCreateParams.VectorStoreChunkingStrategyContextual
     | null;
 }
 
@@ -322,6 +380,62 @@ export namespace FileCreateParams {
       chunk_overlap_tokens?: number;
 
       max_chunk_size_tokens?: number;
+    }
+  }
+
+  /**
+   * Contextual chunking strategy that uses an LLM to situate chunks within the
+   * document.
+   */
+  export interface VectorStoreChunkingStrategyContextual {
+    /**
+     * Configuration for contextual chunking.
+     */
+    contextual: VectorStoreChunkingStrategyContextual.Contextual;
+
+    /**
+     * Strategy type identifier.
+     */
+    type?: 'contextual';
+  }
+
+  export namespace VectorStoreChunkingStrategyContextual {
+    /**
+     * Configuration for contextual chunking.
+     */
+    export interface Contextual {
+      /**
+       * Tokens to overlap between adjacent chunks. Must be less than
+       * max_chunk_size_tokens.
+       */
+      chunk_overlap_tokens?: number;
+
+      /**
+       * Prompt template for contextual retrieval. Uses WHOLE_DOCUMENT and CHUNK_CONTENT
+       * placeholders wrapped in double curly braces.
+       */
+      context_prompt?: string;
+
+      /**
+       * Maximum tokens per chunk. Suggested ~700 to allow room for prepended context.
+       */
+      max_chunk_size_tokens?: number;
+
+      /**
+       * Maximum concurrent LLM calls. Falls back to config default if not provided.
+       */
+      max_concurrency?: number | null;
+
+      /**
+       * LLM model for generating context. Falls back to
+       * VectorStoresConfig.contextual_retrieval_params.model if not provided.
+       */
+      model_id?: string | null;
+
+      /**
+       * Timeout per LLM call in seconds. Falls back to config default if not provided.
+       */
+      timeout_seconds?: number | null;
     }
   }
 }

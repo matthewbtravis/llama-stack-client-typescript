@@ -10,6 +10,9 @@ import { APIResource } from '../resource';
 import * as Core from '../core';
 import * as Shared from './shared';
 
+/**
+ * OpenAI-compatible Moderations API.
+ */
 export class Safety extends APIResource {
   /**
    * Run a safety shield on messages to check for policy violations.
@@ -122,6 +125,9 @@ export namespace SafetyRunShieldParams {
       }
     }
 
+    /**
+     * File content part for OpenAI-compatible chat completion messages.
+     */
     export interface OpenAIFile {
       /**
        * File specification.
@@ -222,6 +228,8 @@ export namespace SafetyRunShieldParams {
      * List of tool calls. Each tool call is an OpenAIChatCompletionToolCall object.
      */
     tool_calls?: Array<OpenAIAssistantMessageParamInput.ToolCall> | null;
+
+    [k: string]: unknown;
   }
 
   export namespace OpenAIAssistantMessageParamInput {
@@ -247,38 +255,33 @@ export namespace SafetyRunShieldParams {
       /**
        * Unique identifier for the tool call.
        */
-      id?: string | null;
+      id: string;
 
       /**
-       * Function call details for OpenAI-compatible tool calls.
+       * Function call details.
        */
-      function?: ToolCall.Function | null;
-
-      /**
-       * Index of the tool call in the list.
-       */
-      index?: number | null;
+      function: ToolCall.Function;
 
       /**
        * Must be 'function' to identify this as a function call.
        */
-      type?: 'function';
+      type: 'function';
     }
 
     export namespace ToolCall {
       /**
-       * Function call details for OpenAI-compatible tool calls.
+       * Function call details.
        */
       export interface Function {
         /**
          * Arguments to pass to the function as a JSON string.
          */
-        arguments?: string | null;
+        arguments: string;
 
         /**
          * Name of the function to call.
          */
-        name?: string | null;
+        name: string;
       }
     }
   }

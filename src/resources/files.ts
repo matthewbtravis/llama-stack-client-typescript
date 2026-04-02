@@ -11,6 +11,9 @@ import { isRequestOptions } from '../core';
 import * as Core from '../core';
 import { OpenAICursorPage, type OpenAICursorPageParams } from '../pagination';
 
+/**
+ * This API is used to upload documents that can be used with other Llama Stack APIs.
+ */
 export class Files extends APIResource {
   /**
    * Upload a file.
@@ -51,7 +54,7 @@ export class Files extends APIResource {
   /**
    * Retrieve file content
    */
-  content(fileId: string, options?: Core.RequestOptions): Core.APIPromise<unknown> {
+  content(fileId: string, options?: Core.RequestOptions): Core.APIPromise<string> {
     return this._client.get(`/v1/files/${fileId}/content`, options);
   }
 }
@@ -98,11 +101,6 @@ export interface File {
   created_at: number;
 
   /**
-   * The Unix timestamp (in seconds) for when the file expires.
-   */
-  expires_at: number;
-
-  /**
    * The name of the file.
    */
   filename: string;
@@ -111,6 +109,11 @@ export interface File {
    * The intended purpose of the file.
    */
   purpose: 'assistants' | 'batch';
+
+  /**
+   * The Unix timestamp (in seconds) for when the file expires.
+   */
+  expires_at?: number | null;
 
   /**
    * The object type, which is always 'file'.
@@ -148,7 +151,7 @@ export interface ListFilesResponse {
   object?: 'list';
 }
 
-export type FileContentResponse = unknown;
+export type FileContentResponse = string;
 
 export interface FileCreateParams {
   /**
@@ -186,12 +189,12 @@ export namespace FileCreateParams {
 
 export interface FileListParams extends OpenAICursorPageParams {
   /**
-   * Sort order for paginated responses.
+   * Sort order by created_at timestamp ('asc' or 'desc').
    */
   order?: 'asc' | 'desc' | null;
 
   /**
-   * Valid purpose values for OpenAI Files API.
+   * Filter files by purpose.
    */
   purpose?: 'assistants' | 'batch' | null;
 }

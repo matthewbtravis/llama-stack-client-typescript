@@ -52,8 +52,6 @@ export {
   type Model,
   type ModelRetrieveResponse,
   type ModelListResponse,
-  type ModelRegisterResponse,
-  type ModelRegisterParams,
 } from './models/models';
 export { Moderations, type CreateResponse, type ModerationCreateParams } from './moderations';
 export {
@@ -103,22 +101,6 @@ export {
   type ShieldListResponse,
   type ShieldRegisterParams,
 } from './shields';
-export {
-  ToolRuntime,
-  type ToolDef,
-  type ToolInvocationResult,
-  type ToolRuntimeListToolsResponse,
-  type ToolRuntimeInvokeToolParams,
-  type ToolRuntimeListToolsParams,
-} from './tool-runtime';
-export {
-  Toolgroups,
-  type ListToolGroupsResponse,
-  type ToolGroup,
-  type ToolgroupListResponse,
-  type ToolgroupRegisterParams,
-} from './toolgroups';
-export { Tools, type ToolListResponse, type ToolListParams } from './tools';
 export {
   VectorIo,
   type QueryChunksResponse,

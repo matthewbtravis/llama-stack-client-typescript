@@ -124,7 +124,7 @@ export interface DatasetRetrieveResponse {
   /**
    * Purpose of the dataset indicating its intended use
    */
-  purpose: 'post-training/messages' | 'eval/question-answer' | 'eval/messages-answer';
+  purpose: 'eval/question-answer' | 'eval/messages-answer';
 
   /**
    * Data source configuration for the dataset
@@ -205,7 +205,7 @@ export namespace DatasetListResponse {
     /**
      * Purpose of the dataset indicating its intended use
      */
-    purpose: 'post-training/messages' | 'eval/question-answer' | 'eval/messages-answer';
+    purpose: 'eval/question-answer' | 'eval/messages-answer';
 
     /**
      * Data source configuration for the dataset
@@ -292,7 +292,7 @@ export interface DatasetRegisterResponse {
   /**
    * Purpose of the dataset indicating its intended use
    */
-  purpose: 'post-training/messages' | 'eval/question-answer' | 'eval/messages-answer';
+  purpose: 'eval/question-answer' | 'eval/messages-answer';
 
   /**
    * Data source configuration for the dataset
@@ -352,11 +352,6 @@ export namespace DatasetRegisterResponse {
 
 export interface DatasetAppendrowsParams {
   /**
-   * The ID of the dataset to append the rows to.
-   */
-  body_dataset_id: string;
-
-  /**
    * The rows to append to the dataset.
    */
   rows: Array<{ [key: string]: unknown }>;
@@ -378,7 +373,7 @@ export interface DatasetRegisterParams {
   /**
    * The purpose of the dataset.
    */
-  purpose: 'post-training/messages' | 'eval/question-answer' | 'eval/messages-answer';
+  purpose: 'eval/question-answer' | 'eval/messages-answer';
 
   /**
    * The data source of the dataset.
