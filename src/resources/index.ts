@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -18,7 +18,6 @@ export {
   type BatchCreateParams,
   type BatchListParams,
 } from './batches';
-export { Beta } from './beta/beta';
 export { Chat, type ChatCompletionChunk } from './chat/chat';
 export {
   Completions,
@@ -46,13 +45,7 @@ export {
   type FileListParams,
 } from './files';
 export { Inspect } from './inspect';
-export {
-  Models,
-  type ListModelsResponse,
-  type Model,
-  type ModelRetrieveResponse,
-  type ModelListResponse,
-} from './models/models';
+export { Models, type ListModelsResponse, type Model, type ModelRetrieveResponse } from './models/models';
 export { Moderations, type CreateResponse, type ModerationCreateParams } from './moderations';
 export {
   Prompts,
@@ -68,32 +61,22 @@ export { Providers, type ProviderListResponse } from './providers';
 export {
   ResponseListResponsesOpenAICursorPage,
   Responses,
+  type CompactedResponse,
+  type ResponseInput,
+  type ResponseMessage,
   type ResponseObject,
   type ResponseObjectStream,
+  type ResponseOutput,
   type ResponseListResponse,
   type ResponseDeleteResponse,
   type ResponseCreateParams,
   type ResponseCreateParamsNonStreaming,
   type ResponseCreateParamsStreaming,
   type ResponseListParams,
+  type ResponseCompactParams,
 } from './responses/responses';
 export { Routes, type RouteListResponse, type RouteListParams } from './routes';
 export { Safety, type RunShieldResponse, type SafetyRunShieldParams } from './safety';
-export {
-  Scoring,
-  type ScoringScoreResponse,
-  type ScoringScoreBatchResponse,
-  type ScoringScoreParams,
-  type ScoringScoreBatchParams,
-} from './scoring';
-export {
-  ScoringFunctions,
-  type ListScoringFunctionsResponse,
-  type ScoringFn,
-  type ScoringFnParams,
-  type ScoringFunctionListResponse,
-  type ScoringFunctionRegisterParams,
-} from './scoring-functions';
 export {
   Shields,
   type ListShieldsResponse,

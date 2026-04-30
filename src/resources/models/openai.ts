@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -14,9 +14,7 @@ export class OpenAI extends APIResource {
   /**
    * List models using the OpenAI API.
    */
-  list(options?: Core.RequestOptions): Core.APIPromise<ModelsAPI.ModelListResponse> {
-    return (
-      this._client.get('/v1/models', options) as Core.APIPromise<{ data: ModelsAPI.ModelListResponse }>
-    )._thenUnwrap((obj) => obj.data);
+  list(options?: Core.RequestOptions): Core.APIPromise<ModelsAPI.ListModelsResponse> {
+    return this._client.get('/v1/models', options);
   }
 }

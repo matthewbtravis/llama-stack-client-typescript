@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -24,10 +24,8 @@ export class Models extends APIResource {
   /**
    * List models using the OpenAI API.
    */
-  list(options?: Core.RequestOptions): Core.APIPromise<ModelListResponse> {
-    return (
-      this._client.get('/v1/models', options) as Core.APIPromise<{ data: ModelListResponse }>
-    )._thenUnwrap((obj) => obj.data);
+  list(options?: Core.RequestOptions): Core.APIPromise<ListModelsResponse> {
+    return this._client.get('/v1/models', options);
   }
 }
 
@@ -38,7 +36,9 @@ export interface ListModelsResponse {
   /**
    * List of OpenAI model objects.
    */
-  data: ModelListResponse;
+  data: Array<Model>;
+
+  object?: 'list';
 }
 
 /**
@@ -46,7 +46,7 @@ export interface ListModelsResponse {
  *
  * :id: The ID of the model :object: The object type, which will be "model"
  * :created: The Unix timestamp in seconds when the model was created :owned_by:
- * The owner of the model :custom_metadata: Llama Stack-specific metadata including
+ * The owner of the model :custom_metadata: OGX-specific metadata including
  * model_type, provider info, and additional metadata
  */
 export interface Model {
@@ -62,13 +62,23 @@ export interface Model {
 }
 
 /**
- * A model resource representing an AI model registered in Llama Stack.
+ * A model resource representing an AI model registered in OGX.
  */
 export interface ModelRetrieveResponse {
   /**
-   * Unique identifier for this resource in llama stack
+   * The model identifier (OpenAI-compatible alias for identifier).
+   */
+  id: string;
+
+  /**
+   * Unique identifier for this resource in ogx
    */
   identifier: string;
+
+  /**
+   * The object type, always 'model'.
+   */
+  object: 'model';
 
   /**
    * ID of the provider that owns this resource
@@ -76,12 +86,17 @@ export interface ModelRetrieveResponse {
   provider_id: string;
 
   /**
+   * The Unix timestamp in seconds when the model was created.
+   */
+  created?: number;
+
+  /**
    * Any additional metadata for this model
    */
   metadata?: { [key: string]: unknown };
 
   /**
-   * Enumeration of supported model types in Llama Stack.
+   * Enumeration of supported model types in OGX.
    */
   model_type?: 'llm' | 'embedding' | 'rerank';
 
@@ -93,17 +108,17 @@ export interface ModelRetrieveResponse {
   model_validation?: boolean | null;
 
   /**
+   * The owner of the model.
+   */
+  owned_by?: string;
+
+  /**
    * Unique identifier for this resource in the provider
    */
   provider_resource_id?: string | null;
 
   type?: 'model';
 }
-
-/**
- * List of OpenAI model objects.
- */
-export type ModelListResponse = Array<Model>;
 
 Models.OpenAI = OpenAI;
 
@@ -112,7 +127,6 @@ export declare namespace Models {
     type ListModelsResponse as ListModelsResponse,
     type Model as Model,
     type ModelRetrieveResponse as ModelRetrieveResponse,
-    type ModelListResponse as ModelListResponse,
   };
 
   export { OpenAI as OpenAI };

@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -423,34 +423,19 @@ export namespace SamplingParams {
 }
 
 /**
- * A scoring result for a single row.
- */
-export interface ScoringResult {
-  /**
-   * Map of metric name to aggregated value
-   */
-  aggregated_results: { [key: string]: unknown };
-
-  /**
-   * The scoring result for each row. Each row is a map of column name to value.
-   */
-  score_rows: Array<{ [key: string]: unknown }>;
-}
-
-/**
  * A system message providing instructions or context to the model.
  */
 export interface SystemMessage {
   /**
    * The content of the 'system prompt'. If multiple system messages are provided,
-   * they are concatenated. The underlying Llama Stack code may also add other system
+   * they are concatenated. The underlying OGX code may also add other system
    * messages.
    */
   content:
     | string
-    | SystemMessage.ImageContentItemInput
+    | SystemMessage.ImageContentItem
     | SystemMessage.TextContentItem
-    | Array<SystemMessage.ImageContentItemInput | SystemMessage.TextContentItem>;
+    | Array<SystemMessage.ImageContentItem | SystemMessage.TextContentItem>;
 
   /**
    * Must be 'system' to identify this as a system message.
@@ -462,16 +447,16 @@ export namespace SystemMessage {
   /**
    * A image content item
    */
-  export interface ImageContentItemInput {
+  export interface ImageContentItem {
     /**
      * A URL or a base64 encoded string
      */
-    image: ImageContentItemInput.Image;
+    image: ImageContentItem.Image;
 
     type?: 'image';
   }
 
-  export namespace ImageContentItemInput {
+  export namespace ImageContentItem {
     /**
      * A URL or a base64 encoded string
      */
@@ -506,16 +491,16 @@ export namespace SystemMessage {
   /**
    * A image content item
    */
-  export interface ImageContentItemInput {
+  export interface ImageContentItem {
     /**
      * A URL or a base64 encoded string
      */
-    image: ImageContentItemInput.Image;
+    image: ImageContentItem.Image;
 
     type?: 'image';
   }
 
-  export namespace ImageContentItemInput {
+  export namespace ImageContentItem {
     /**
      * A URL or a base64 encoded string
      */

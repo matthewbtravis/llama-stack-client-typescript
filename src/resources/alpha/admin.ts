@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -13,6 +13,9 @@ import * as ProvidersAPI from '../providers';
 import * as RoutesAPI from '../routes';
 import * as Shared from '../shared';
 
+/**
+ * Administrative APIs for inspecting providers, routes, health, and version.
+ */
 export class Admin extends APIResource {
   /**
    * Get the current health status of the service.

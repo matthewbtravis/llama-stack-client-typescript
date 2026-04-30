@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -10,12 +10,17 @@ export { InputItems, type InputItemListResponse, type InputItemListParams } from
 export {
   ResponseListResponsesOpenAICursorPage,
   Responses,
+  type CompactedResponse,
+  type ResponseInput,
+  type ResponseMessage,
   type ResponseObject,
   type ResponseObjectStream,
+  type ResponseOutput,
   type ResponseListResponse,
   type ResponseDeleteResponse,
   type ResponseCreateParams,
   type ResponseCreateParamsNonStreaming,
   type ResponseCreateParamsStreaming,
   type ResponseListParams,
+  type ResponseCompactParams,
 } from './responses';

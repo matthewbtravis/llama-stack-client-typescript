@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -8,21 +8,4 @@
 
 export { Admin, type AdminListRoutesParams } from './admin';
 export { Alpha } from './alpha';
-export {
-  Benchmarks,
-  type Benchmark,
-  type ListBenchmarksResponse,
-  type BenchmarkListResponse,
-  type BenchmarkRegisterParams,
-} from './benchmarks';
-export {
-  Eval,
-  type BenchmarkConfig,
-  type EvaluateResponse,
-  type Job,
-  type EvalEvaluateRowsParams,
-  type EvalEvaluateRowsAlphaParams,
-  type EvalRunEvalParams,
-  type EvalRunEvalAlphaParams,
-} from './eval/index';
 export { Inference, type InferenceRerankResponse, type InferenceRerankParams } from './inference';

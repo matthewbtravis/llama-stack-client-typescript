@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -12,7 +12,7 @@ import * as Core from '../core';
 import { OpenAICursorPage, type OpenAICursorPageParams } from '../pagination';
 
 /**
- * This API is used to upload documents that can be used with other Llama Stack APIs.
+ * This API is used to upload documents that can be used with other OGX APIs.
  */
 export class Files extends APIResource {
   /**
@@ -109,6 +109,17 @@ export interface File {
    * The intended purpose of the file.
    */
   purpose: 'assistants' | 'batch';
+
+  /**
+   * @deprecated Deprecated. The current status of the file.
+   */
+  status: 'uploaded' | 'processed' | 'error';
+
+  /**
+   * @deprecated Deprecated. For details on why a fine-tuning training file failed
+   * validation, see the error field on fine_tuning.job.
+   */
+  status_details: string;
 
   /**
    * The Unix timestamp (in seconds) for when the file expires.

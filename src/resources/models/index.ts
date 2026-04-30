@@ -1,4 +1,4 @@
-// Copyright (c) Meta Platforms, Inc. and affiliates.
+// Copyright (c) The OGX Contributors.
 // All rights reserved.
 //
 // This source code is licensed under the terms described in the LICENSE file in
@@ -6,11 +6,5 @@
 //
 // File generated from our OpenAPI spec by Stainless. See CONTRIBUTING.md for details.
 
-export {
-  Models,
-  type ListModelsResponse,
-  type Model,
-  type ModelRetrieveResponse,
-  type ModelListResponse,
-} from './models';
+export { Models, type ListModelsResponse, type Model, type ModelRetrieveResponse } from './models';
 export { OpenAI } from './openai';

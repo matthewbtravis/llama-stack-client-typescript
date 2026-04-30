@@ -4,9 +4,9 @@
 // This source code is licensed under the terms described in the LICENSE file in
 // the root directory of this source tree.
 
-import { getResponseOutputText } from 'llama-stack-client';
-import { createResponseHeaders } from 'llama-stack-client/core';
-import { Headers } from 'llama-stack-client/_shims/index';
+import { getResponseOutputText } from 'ogx-client';
+import { createResponseHeaders } from 'ogx-client/core';
+import { Headers } from 'ogx-client/_shims/index';
 
 describe('response parsing', () => {
   // TODO: test unicode characters
