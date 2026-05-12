@@ -10,7 +10,6 @@ Types:
 - <code><a href="./src/resources/shared.ts">ParamType</a></code>
 - <code><a href="./src/resources/shared.ts">ProviderInfo</a></code>
 - <code><a href="./src/resources/shared.ts">RouteInfo</a></code>
-- <code><a href="./src/resources/shared.ts">SafetyViolation</a></code>
 - <code><a href="./src/resources/shared.ts">SamplingParams</a></code>
 - <code><a href="./src/resources/shared.ts">SystemMessage</a></code>
 - <code><a href="./src/resources/shared.ts">VersionInfo</a></code>
@@ -89,15 +88,14 @@ Types:
 
 - <code><a href="./src/resources/conversations/items.ts">ItemCreateResponse</a></code>
 - <code><a href="./src/resources/conversations/items.ts">ItemListResponse</a></code>
-- <code><a href="./src/resources/conversations/items.ts">ItemDeleteResponse</a></code>
 - <code><a href="./src/resources/conversations/items.ts">ItemGetResponse</a></code>
 
 Methods:
 
 - <code title="post /v1/conversations/{conversation_id}/items">client.conversations.items.<a href="./src/resources/conversations/items.ts">create</a>(conversationId, { ...params }) -> ItemCreateResponse</code>
 - <code title="get /v1/conversations/{conversation_id}/items">client.conversations.items.<a href="./src/resources/conversations/items.ts">list</a>(conversationId, { ...params }) -> ItemListResponsesOpenAICursorPage</code>
-- <code title="delete /v1/conversations/{conversation_id}/items/{item_id}">client.conversations.items.<a href="./src/resources/conversations/items.ts">delete</a>(conversationId, itemId) -> ItemDeleteResponse</code>
-- <code title="get /v1/conversations/{conversation_id}/items/{item_id}">client.conversations.items.<a href="./src/resources/conversations/items.ts">get</a>(conversationId, itemId) -> ItemGetResponse</code>
+- <code title="delete /v1/conversations/{conversation_id}/items/{item_id}">client.conversations.items.<a href="./src/resources/conversations/items.ts">delete</a>(conversationId, itemId) -> ConversationObject</code>
+- <code title="get /v1/conversations/{conversation_id}/items/{item_id}">client.conversations.items.<a href="./src/resources/conversations/items.ts">get</a>(conversationId, itemId, { ...params }) -> ItemGetResponse</code>
 
 # Inspect
 
@@ -126,15 +124,25 @@ Types:
 
 Types:
 
-- <code><a href="./src/resources/chat/completions.ts">CompletionCreateResponse</a></code>
-- <code><a href="./src/resources/chat/completions.ts">CompletionRetrieveResponse</a></code>
-- <code><a href="./src/resources/chat/completions.ts">CompletionListResponse</a></code>
+- <code><a href="./src/resources/chat/completions/completions.ts">CompletionCreateResponse</a></code>
+- <code><a href="./src/resources/chat/completions/completions.ts">CompletionRetrieveResponse</a></code>
+- <code><a href="./src/resources/chat/completions/completions.ts">CompletionListResponse</a></code>
 
 Methods:
 
-- <code title="post /v1/chat/completions">client.chat.completions.<a href="./src/resources/chat/completions.ts">create</a>({ ...params }) -> CompletionCreateResponse</code>
-- <code title="get /v1/chat/completions/{completion_id}">client.chat.completions.<a href="./src/resources/chat/completions.ts">retrieve</a>(completionId) -> CompletionRetrieveResponse</code>
-- <code title="get /v1/chat/completions">client.chat.completions.<a href="./src/resources/chat/completions.ts">list</a>({ ...params }) -> CompletionListResponse</code>
+- <code title="post /v1/chat/completions">client.chat.completions.<a href="./src/resources/chat/completions/completions.ts">create</a>({ ...params }) -> CompletionCreateResponse</code>
+- <code title="get /v1/chat/completions/{completion_id}">client.chat.completions.<a href="./src/resources/chat/completions/completions.ts">retrieve</a>(completionId) -> CompletionRetrieveResponse</code>
+- <code title="get /v1/chat/completions">client.chat.completions.<a href="./src/resources/chat/completions/completions.ts">list</a>({ ...params }) -> CompletionListResponse</code>
+
+### Messages
+
+Types:
+
+- <code><a href="./src/resources/chat/completions/messages.ts">MessageListResponse</a></code>
+
+Methods:
+
+- <code title="get /v1/chat/completions/{completion_id}/messages">client.chat.completions.messages.<a href="./src/resources/chat/completions/messages.ts">list</a>(completionId, { ...params }) -> MessageListResponsesOpenAICursorPage</code>
 
 # Completions
 
@@ -213,17 +221,22 @@ Types:
 - <code><a href="./src/resources/models/models.ts">ListModelsResponse</a></code>
 - <code><a href="./src/resources/models/models.ts">Model</a></code>
 - <code><a href="./src/resources/models/models.ts">ModelRetrieveResponse</a></code>
+- <code><a href="./src/resources/models/models.ts">ModelListResponse</a></code>
 
 Methods:
 
-- <code title="get /v1/models/{model_id}">client.models.<a href="./src/resources/models/models.ts">retrieve</a>(modelId) -> ModelRetrieveResponse</code>
-- <code title="get /v1/models">client.models.<a href="./src/resources/models/models.ts">list</a>() -> ListModelsResponse</code>
+- <code title="get /v1/models/{model_id}">client.models.<a href="./src/resources/models/models.ts">retrieve</a>(modelId, { ...params }) -> ModelRetrieveResponse</code>
+- <code title="get /v1/models">client.models.<a href="./src/resources/models/models.ts">list</a>({ ...params }) -> ModelListResponse</code>
 
 ## OpenAI
 
+Types:
+
+- <code><a href="./src/resources/models/openai.ts">OpenAIListResponse</a></code>
+
 Methods:
 
-- <code title="get /v1/models">client.models.openai.<a href="./src/resources/models/openai.ts">list</a>() -> ListModelsResponse</code>
+- <code title="get /v1/models">client.models.openai.<a href="./src/resources/models/openai.ts">list</a>({ ...params }) -> OpenAIListResponse</code>
 
 # Providers
 
@@ -245,41 +258,6 @@ Types:
 Methods:
 
 - <code title="get /v1/inspect/routes">client.routes.<a href="./src/resources/routes.ts">list</a>({ ...params }) -> RouteListResponse</code>
-
-# Moderations
-
-Types:
-
-- <code><a href="./src/resources/moderations.ts">CreateResponse</a></code>
-
-Methods:
-
-- <code title="post /v1/moderations">client.moderations.<a href="./src/resources/moderations.ts">create</a>({ ...params }) -> CreateResponse</code>
-
-# Safety
-
-Types:
-
-- <code><a href="./src/resources/safety.ts">RunShieldResponse</a></code>
-
-Methods:
-
-- <code title="post /v1/safety/run-shield">client.safety.<a href="./src/resources/safety.ts">runShield</a>({ ...params }) -> RunShieldResponse</code>
-
-# Shields
-
-Types:
-
-- <code><a href="./src/resources/shields.ts">ListShieldsResponse</a></code>
-- <code><a href="./src/resources/shields.ts">Shield</a></code>
-- <code><a href="./src/resources/shields.ts">ShieldListResponse</a></code>
-
-Methods:
-
-- <code title="get /v1/shields/{identifier}">client.shields.<a href="./src/resources/shields.ts">retrieve</a>(identifier) -> Shield</code>
-- <code title="get /v1/shields">client.shields.<a href="./src/resources/shields.ts">list</a>() -> ShieldListResponse</code>
-- <code title="delete /v1/shields/{identifier}">client.shields.<a href="./src/resources/shields.ts">delete</a>(identifier) -> void</code>
-- <code title="post /v1/shields">client.shields.<a href="./src/resources/shields.ts">register</a>({ ...params }) -> Shield</code>
 
 # Files
 
