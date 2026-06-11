@@ -46,7 +46,12 @@ describe('resource responses', () => {
         version: 'version',
       },
       prompt_cache_key: 'prompt_cache_key',
-      reasoning: { effort: 'none', summary: 'auto' },
+      reasoning: {
+        effort: 'none',
+        generate_summary: 'auto',
+        summary: 'auto',
+      },
+      safety_identifier: 'safety_identifier',
       service_tier: 'auto',
       store: true,
       stream: false,
@@ -63,7 +68,20 @@ describe('resource responses', () => {
         verbosity: 'low',
       },
       tool_choice: 'auto',
-      tools: [{ search_context_size: 'S?oC"high', type: 'web_search' }],
+      tools: [
+        {
+          filters: { allowed_domains: ['string'] },
+          search_context_size: 'low',
+          type: 'web_search',
+          user_location: {
+            city: 'city',
+            country: 'country',
+            region: 'region',
+            timezone: 'timezone',
+            type: 'approximate',
+          },
+        },
+      ],
       top_logprobs: 0,
       top_p: 0,
       truncation: 'auto',
@@ -158,7 +176,11 @@ describe('resource responses', () => {
       parallel_tool_calls: true,
       previous_response_id: 'previous_response_id',
       prompt_cache_key: 'prompt_cache_key',
-      reasoning: { effort: 'none', summary: 'auto' },
+      reasoning: {
+        effort: 'none',
+        generate_summary: 'auto',
+        summary: 'auto',
+      },
       text: {
         format: {
           description: 'description',
@@ -169,7 +191,20 @@ describe('resource responses', () => {
         },
         verbosity: 'low',
       },
-      tools: [{ search_context_size: 'S?oC"high', type: 'web_search' }],
+      tools: [
+        {
+          filters: { allowed_domains: ['string'] },
+          search_context_size: 'low',
+          type: 'web_search',
+          user_location: {
+            city: 'city',
+            country: 'country',
+            region: 'region',
+            timezone: 'timezone',
+            type: 'approximate',
+          },
+        },
+      ],
     });
   });
 });

@@ -101,7 +101,7 @@ export interface CompactedResponse {
 
   output: Array<
     | CompactedResponse.OpenAIResponseMessageOutput
-    | CompactedResponse.OpenAIResponseOutputMessageWebSearchToolCall
+    | CompactedResponse.OpenAIResponseOutputMessageWebSearchToolCallOutput
     | CompactedResponse.OpenAIResponseOutputMessageFileSearchToolCall
     | CompactedResponse.OpenAIResponseOutputMessageFunctionToolCall
     | CompactedResponse.OpenAIResponseOutputMessageMcpCall
@@ -325,12 +325,67 @@ export namespace CompactedResponse {
   /**
    * Web search tool call output message for OpenAI responses.
    */
-  export interface OpenAIResponseOutputMessageWebSearchToolCall {
+  export interface OpenAIResponseOutputMessageWebSearchToolCallOutput {
     id: string;
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCallOutput {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -657,7 +712,62 @@ export namespace ResponseInput {
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCall {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -1131,7 +1241,7 @@ export interface ResponseObject {
 
   output: Array<
     | ResponseObject.OpenAIResponseMessageOutput
-    | ResponseObject.OpenAIResponseOutputMessageWebSearchToolCall
+    | ResponseObject.OpenAIResponseOutputMessageWebSearchToolCallOutput
     | ResponseObject.OpenAIResponseOutputMessageFileSearchToolCall
     | ResponseObject.OpenAIResponseOutputMessageFunctionToolCall
     | ResponseObject.OpenAIResponseOutputMessageMcpCall
@@ -1166,7 +1276,7 @@ export interface ResponseObject {
 
   max_tool_calls?: number | null;
 
-  metadata?: { [key: string]: string } | null;
+  metadata?: unknown;
 
   object?: 'response';
 
@@ -1189,6 +1299,8 @@ export interface ResponseObject {
    * Controls how much reasoning the model performs before generating a response.
    */
   reasoning?: ResponseObject.Reasoning | null;
+
+  safety_identifier?: string | null;
 
   service_tier?: string;
 
@@ -1225,7 +1337,11 @@ export interface ResponseObject {
 
   top_p?: number;
 
-  truncation?: string | null;
+  /**
+   * Controls how the service truncates input when it exceeds the model context
+   * window.
+   */
+  truncation?: 'auto' | 'disabled';
 
   /**
    * Usage information for OpenAI response.
@@ -1437,12 +1553,67 @@ export namespace ResponseObject {
   /**
    * Web search tool call output message for OpenAI responses.
    */
-  export interface OpenAIResponseOutputMessageWebSearchToolCall {
+  export interface OpenAIResponseOutputMessageWebSearchToolCallOutput {
     id: string;
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCallOutput {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -1696,6 +1867,11 @@ export namespace ResponseObject {
     effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
 
     /**
+     * @deprecated Deprecated: use 'summary' instead.
+     */
+    generate_summary?: 'auto' | 'concise' | 'detailed' | null;
+
+    /**
      * Summary mode for reasoning output. One of 'auto', 'concise', or 'detailed'.
      */
     summary?: 'auto' | 'concise' | 'detailed' | null;
@@ -1788,9 +1964,43 @@ export namespace ResponseObject {
    * Web search tool configuration for OpenAI response inputs.
    */
   export interface OpenAIResponseInputToolWebSearch {
-    search_context_size?: string | null;
+    /**
+     * Domain filters for web search results.
+     */
+    filters?: OpenAIResponseInputToolWebSearch.Filters | null;
+
+    search_context_size?: 'low' | 'medium' | 'high' | null;
 
     type?: 'web_search' | 'web_search_preview' | 'web_search_preview_2025_03_11' | 'web_search_2025_08_26';
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    user_location?: OpenAIResponseInputToolWebSearch.UserLocation | null;
+  }
+
+  export namespace OpenAIResponseInputToolWebSearch {
+    /**
+     * Domain filters for web search results.
+     */
+    export interface Filters {
+      allowed_domains?: Array<string> | null;
+    }
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    export interface UserLocation {
+      city?: string | null;
+
+      country?: string | null;
+
+      region?: string | null;
+
+      timezone?: string | null;
+
+      type?: 'approximate';
+    }
   }
 
   /**
@@ -2059,7 +2269,62 @@ export namespace ResponseObjectStream {
 
       status: string;
 
+      /**
+       * Web search action: performs a search query.
+       */
+      action?:
+        | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionSearch
+        | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionOpenPage
+        | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionFind
+        | null;
+
       type?: 'web_search_call';
+    }
+
+    export namespace OpenAIResponseOutputMessageWebSearchToolCall {
+      /**
+       * Web search action: performs a search query.
+       */
+      export interface WebSearchActionSearch {
+        query: string;
+
+        queries?: Array<string> | null;
+
+        sources?: Array<WebSearchActionSearch.Source> | null;
+
+        type?: 'search';
+      }
+
+      export namespace WebSearchActionSearch {
+        /**
+         * A source URL returned by a web search action.
+         */
+        export interface Source {
+          url: string;
+
+          type?: 'url';
+        }
+      }
+
+      /**
+       * Web search action: opens a specific URL from search results.
+       */
+      export interface WebSearchActionOpenPage {
+        type?: 'open_page';
+
+        url?: string | null;
+      }
+
+      /**
+       * Web search action: searches for a pattern within a loaded page.
+       */
+      export interface WebSearchActionFind {
+        pattern: string;
+
+        url: string;
+
+        type?: 'find_in_page';
+      }
     }
 
     /**
@@ -2271,7 +2536,62 @@ export namespace ResponseObjectStream {
 
       status: string;
 
+      /**
+       * Web search action: performs a search query.
+       */
+      action?:
+        | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionSearch
+        | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionOpenPage
+        | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionFind
+        | null;
+
       type?: 'web_search_call';
+    }
+
+    export namespace OpenAIResponseOutputMessageWebSearchToolCall {
+      /**
+       * Web search action: performs a search query.
+       */
+      export interface WebSearchActionSearch {
+        query: string;
+
+        queries?: Array<string> | null;
+
+        sources?: Array<WebSearchActionSearch.Source> | null;
+
+        type?: 'search';
+      }
+
+      export namespace WebSearchActionSearch {
+        /**
+         * A source URL returned by a web search action.
+         */
+        export interface Source {
+          url: string;
+
+          type?: 'url';
+        }
+      }
+
+      /**
+       * Web search action: opens a specific URL from search results.
+       */
+      export interface WebSearchActionOpenPage {
+        type?: 'open_page';
+
+        url?: string | null;
+      }
+
+      /**
+       * Web search action: searches for a pattern within a loaded page.
+       */
+      export interface WebSearchActionFind {
+        pattern: string;
+
+        url: string;
+
+        type?: 'find_in_page';
+      }
     }
 
     /**
@@ -3402,7 +3722,62 @@ export namespace ResponseOutput {
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCall.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCall {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -3587,7 +3962,7 @@ export interface ResponseListResponse {
 
   input: Array<
     | ResponseListResponse.OpenAIResponseMessageOutput
-    | ResponseListResponse.OpenAIResponseOutputMessageWebSearchToolCall
+    | ResponseListResponse.OpenAIResponseOutputMessageWebSearchToolCallOutput
     | ResponseListResponse.OpenAIResponseOutputMessageFileSearchToolCall
     | ResponseListResponse.OpenAIResponseOutputMessageFunctionToolCall
     | ResponseListResponse.OpenAIResponseOutputMessageMcpCall
@@ -3603,7 +3978,7 @@ export interface ResponseListResponse {
 
   output: Array<
     | ResponseListResponse.OpenAIResponseMessageOutput
-    | ResponseListResponse.OpenAIResponseOutputMessageWebSearchToolCall
+    | ResponseListResponse.OpenAIResponseOutputMessageWebSearchToolCallOutput
     | ResponseListResponse.OpenAIResponseOutputMessageFileSearchToolCall
     | ResponseListResponse.OpenAIResponseOutputMessageFunctionToolCall
     | ResponseListResponse.OpenAIResponseOutputMessageMcpCall
@@ -3662,6 +4037,8 @@ export interface ResponseListResponse {
    */
   reasoning?: ResponseListResponse.Reasoning | null;
 
+  safety_identifier?: string | null;
+
   service_tier?: string;
 
   temperature?: number;
@@ -3697,7 +4074,11 @@ export interface ResponseListResponse {
 
   top_p?: number;
 
-  truncation?: string | null;
+  /**
+   * Controls how the service truncates input when it exceeds the model context
+   * window.
+   */
+  truncation?: 'auto' | 'disabled' | null;
 
   /**
    * Usage information for OpenAI response.
@@ -3909,12 +4290,67 @@ export namespace ResponseListResponse {
   /**
    * Web search tool call output message for OpenAI responses.
    */
-  export interface OpenAIResponseOutputMessageWebSearchToolCall {
+  export interface OpenAIResponseOutputMessageWebSearchToolCallOutput {
     id: string;
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCallOutput {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -4378,12 +4814,67 @@ export namespace ResponseListResponse {
   /**
    * Web search tool call output message for OpenAI responses.
    */
-  export interface OpenAIResponseOutputMessageWebSearchToolCall {
+  export interface OpenAIResponseOutputMessageWebSearchToolCallOutput {
     id: string;
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCallOutput.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCallOutput {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -4637,6 +5128,11 @@ export namespace ResponseListResponse {
     effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
 
     /**
+     * @deprecated Deprecated: use 'summary' instead.
+     */
+    generate_summary?: 'auto' | 'concise' | 'detailed' | null;
+
+    /**
      * Summary mode for reasoning output. One of 'auto', 'concise', or 'detailed'.
      */
     summary?: 'auto' | 'concise' | 'detailed' | null;
@@ -4729,9 +5225,43 @@ export namespace ResponseListResponse {
    * Web search tool configuration for OpenAI response inputs.
    */
   export interface OpenAIResponseInputToolWebSearch {
-    search_context_size?: string | null;
+    /**
+     * Domain filters for web search results.
+     */
+    filters?: OpenAIResponseInputToolWebSearch.Filters | null;
+
+    search_context_size?: 'low' | 'medium' | 'high' | null;
 
     type?: 'web_search' | 'web_search_preview' | 'web_search_preview_2025_03_11' | 'web_search_2025_08_26';
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    user_location?: OpenAIResponseInputToolWebSearch.UserLocation | null;
+  }
+
+  export namespace OpenAIResponseInputToolWebSearch {
+    /**
+     * Domain filters for web search results.
+     */
+    export interface Filters {
+      allowed_domains?: Array<string> | null;
+    }
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    export interface UserLocation {
+      city?: string | null;
+
+      country?: string | null;
+
+      region?: string | null;
+
+      timezone?: string | null;
+
+      type?: 'approximate';
+    }
   }
 
   /**
@@ -4913,7 +5443,7 @@ export interface ResponseCreateParamsBase {
     | string
     | Array<
         | ResponseCreateParams.OpenAIResponseMessageInput
-        | ResponseCreateParams.OpenAIResponseOutputMessageWebSearchToolCall
+        | ResponseCreateParams.OpenAIResponseOutputMessageWebSearchToolCallInput
         | ResponseCreateParams.OpenAIResponseOutputMessageFileSearchToolCall
         | ResponseCreateParams.OpenAIResponseOutputMessageFunctionToolCall
         | ResponseCreateParams.OpenAIResponseOutputMessageMcpCall
@@ -5023,6 +5553,12 @@ export interface ResponseCreateParamsBase {
   reasoning?: ResponseCreateParams.Reasoning | null;
 
   /**
+   * A stable identifier used to associate the request with an end user, for safety
+   * monitoring. Echoed back on the response.
+   */
+  safety_identifier?: string | null;
+
+  /**
    * The service tier for the request.
    */
   service_tier?: 'auto' | 'default' | 'flex' | 'priority' | null;
@@ -5093,7 +5629,7 @@ export interface ResponseCreateParamsBase {
    * Controls how the service truncates input when it exceeds the model context
    * window.
    */
-  truncation?: 'auto' | 'disabled' | null;
+  truncation?: 'auto' | 'disabled';
 
   [k: string]: unknown;
 }
@@ -5302,12 +5838,67 @@ export namespace ResponseCreateParams {
   /**
    * Web search tool call output message for OpenAI responses.
    */
-  export interface OpenAIResponseOutputMessageWebSearchToolCall {
+  export interface OpenAIResponseOutputMessageWebSearchToolCallInput {
     id: string;
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCallInput.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCallInput.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCallInput.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCallInput {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -5647,6 +6238,11 @@ export namespace ResponseCreateParams {
     effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
 
     /**
+     * @deprecated Deprecated: use 'summary' instead.
+     */
+    generate_summary?: 'auto' | 'concise' | 'detailed' | null;
+
+    /**
      * Summary mode for reasoning output. One of 'auto', 'concise', or 'detailed'.
      */
     summary?: 'auto' | 'concise' | 'detailed' | null;
@@ -5749,9 +6345,43 @@ export namespace ResponseCreateParams {
    * Web search tool configuration for OpenAI response inputs.
    */
   export interface OpenAIResponseInputToolWebSearch {
-    search_context_size?: string | null;
+    /**
+     * Domain filters for web search results.
+     */
+    filters?: OpenAIResponseInputToolWebSearch.Filters | null;
+
+    search_context_size?: 'low' | 'medium' | 'high' | null;
 
     type?: 'web_search' | 'web_search_preview' | 'web_search_preview_2025_03_11' | 'web_search_2025_08_26';
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    user_location?: OpenAIResponseInputToolWebSearch.UserLocation | null;
+  }
+
+  export namespace OpenAIResponseInputToolWebSearch {
+    /**
+     * Domain filters for web search results.
+     */
+    export interface Filters {
+      allowed_domains?: Array<string> | null;
+    }
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    export interface UserLocation {
+      city?: string | null;
+
+      country?: string | null;
+
+      region?: string | null;
+
+      timezone?: string | null;
+
+      type?: 'approximate';
+    }
   }
 
   /**
@@ -5932,9 +6562,9 @@ export interface ResponseListParams extends OpenAICursorPageParams {
 
 export interface ResponseCompactParams {
   /**
-   * The model to use for generating the compacted summary.
+   * Model identifier.
    */
-  model: string;
+  model: string | null;
 
   /**
    * Input message(s) to compact.
@@ -5943,7 +6573,7 @@ export interface ResponseCompactParams {
     | string
     | Array<
         | ResponseCompactParams.OpenAIResponseMessageInput
-        | ResponseCompactParams.OpenAIResponseOutputMessageWebSearchToolCall
+        | ResponseCompactParams.OpenAIResponseOutputMessageWebSearchToolCallInput
         | ResponseCompactParams.OpenAIResponseOutputMessageFileSearchToolCall
         | ResponseCompactParams.OpenAIResponseOutputMessageFunctionToolCall
         | ResponseCompactParams.OpenAIResponseOutputMessageMcpCall
@@ -6207,12 +6837,67 @@ export namespace ResponseCompactParams {
   /**
    * Web search tool call output message for OpenAI responses.
    */
-  export interface OpenAIResponseOutputMessageWebSearchToolCall {
+  export interface OpenAIResponseOutputMessageWebSearchToolCallInput {
     id: string;
 
     status: string;
 
+    /**
+     * Web search action: performs a search query.
+     */
+    action?:
+      | OpenAIResponseOutputMessageWebSearchToolCallInput.WebSearchActionSearch
+      | OpenAIResponseOutputMessageWebSearchToolCallInput.WebSearchActionOpenPage
+      | OpenAIResponseOutputMessageWebSearchToolCallInput.WebSearchActionFind
+      | null;
+
     type?: 'web_search_call';
+  }
+
+  export namespace OpenAIResponseOutputMessageWebSearchToolCallInput {
+    /**
+     * Web search action: performs a search query.
+     */
+    export interface WebSearchActionSearch {
+      query: string;
+
+      queries?: Array<string> | null;
+
+      sources?: Array<WebSearchActionSearch.Source> | null;
+
+      type?: 'search';
+    }
+
+    export namespace WebSearchActionSearch {
+      /**
+       * A source URL returned by a web search action.
+       */
+      export interface Source {
+        url: string;
+
+        type?: 'url';
+      }
+    }
+
+    /**
+     * Web search action: opens a specific URL from search results.
+     */
+    export interface WebSearchActionOpenPage {
+      type?: 'open_page';
+
+      url?: string | null;
+    }
+
+    /**
+     * Web search action: searches for a pattern within a loaded page.
+     */
+    export interface WebSearchActionFind {
+      pattern: string;
+
+      url: string;
+
+      type?: 'find_in_page';
+    }
   }
 
   /**
@@ -6482,6 +7167,11 @@ export namespace ResponseCompactParams {
     effort?: 'none' | 'minimal' | 'low' | 'medium' | 'high' | 'xhigh' | null;
 
     /**
+     * @deprecated Deprecated: use 'summary' instead.
+     */
+    generate_summary?: 'auto' | 'concise' | 'detailed' | null;
+
+    /**
      * Summary mode for reasoning output. One of 'auto', 'concise', or 'detailed'.
      */
     summary?: 'auto' | 'concise' | 'detailed' | null;
@@ -6520,9 +7210,43 @@ export namespace ResponseCompactParams {
    * Web search tool configuration for OpenAI response inputs.
    */
   export interface OpenAIResponseInputToolWebSearch {
-    search_context_size?: string | null;
+    /**
+     * Domain filters for web search results.
+     */
+    filters?: OpenAIResponseInputToolWebSearch.Filters | null;
+
+    search_context_size?: 'low' | 'medium' | 'high' | null;
 
     type?: 'web_search' | 'web_search_preview' | 'web_search_preview_2025_03_11' | 'web_search_2025_08_26';
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    user_location?: OpenAIResponseInputToolWebSearch.UserLocation | null;
+  }
+
+  export namespace OpenAIResponseInputToolWebSearch {
+    /**
+     * Domain filters for web search results.
+     */
+    export interface Filters {
+      allowed_domains?: Array<string> | null;
+    }
+
+    /**
+     * Approximate user location to refine web search results.
+     */
+    export interface UserLocation {
+      city?: string | null;
+
+      country?: string | null;
+
+      region?: string | null;
+
+      timezone?: string | null;
+
+      type?: 'approximate';
+    }
   }
 
   /**
